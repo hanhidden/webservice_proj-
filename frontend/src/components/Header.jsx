@@ -58,6 +58,13 @@ export default function Header({ user, scrollToReport, onLogin, onLogout }) {
           </span>
         )}
 
+        <button
+          type="submit"
+          className="bg-[#fbbf24] hover:bg-yellow-500 text-[#0d1b2a] font-semibold px-5 py-2 rounded-lg text-sm"
+        >
+          Sign up
+        </button>
+
         <Link
           to="/stats"
           className="flex items-center hover:text-yellow-600 whitespace-nowrap"
