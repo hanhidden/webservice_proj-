@@ -21,3 +21,6 @@ async def list_collections():
         return {"collections": collections}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+    
