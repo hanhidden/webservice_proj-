@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends,FastAPI
 from app.models.user import User, Role, UserCreate
 from app.auth.jwt_handler import create_access_token
-from app.core.user_crud import get_user_by_email, create_user
+from app.schemas.user_crud import get_user_by_email, create_user
 from pydantic import BaseModel
 from passlib.context import CryptContext
 
