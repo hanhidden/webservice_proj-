@@ -5,6 +5,7 @@ import UserDashboard from "./pages/user/UserDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import SecretariaDashboard from "./pages/secrateria/SecretariaDashboard";
 import OrganizationDashboard from "./pages/organization/OrganizationDashboard";
+import NewVictimForm from './pages/organization/NewVictimForm';
 import { useAuth } from "./auth";
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
 
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+       <Route path="/victims/new" element={<NewVictimForm />} />
 
       {/* Role-based dashboard route */}
       <Route
