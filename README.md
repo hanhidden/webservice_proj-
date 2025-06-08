@@ -4,7 +4,8 @@
 
 - Noor – Incident Reporting Module
 - Hannen – Victim/Witness Database Module
-- Eliaa – Case Management + Analytics Module
+- Eliaa – Case Management
+- All: Analytics Module
 
 ## 🧠 Tech Stack
 
