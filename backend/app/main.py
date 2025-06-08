@@ -3,6 +3,7 @@ from app.api.routes.auth import router as auth_router
 from app.api.routes.test_connection import router as test_connection_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.routes.victims import router as victim_router
 
 app = FastAPI()
 
@@ -24,4 +25,5 @@ app.add_middleware(
 
 app.include_router(test_connection_router, prefix="/api")
 app.include_router(auth_router, prefix="/api/auth")
+app.include_router(victim_router, prefix="/api/victims")
 

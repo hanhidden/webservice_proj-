@@ -87,12 +87,22 @@ function LoginPage() {
                 Welcome back, <span className="underline">{user.email}</span>.
               </p>
               <div className="flex justify-center gap-4">
+               
                 <Link
-                  to="/dashboard"
+                  to={
+                    user.role === "admin"
+                      ? "/dashboard/admin"
+                      : user.role === "secretaria"
+                      ? "/dashboard/secretaria"
+                      : user.role === "organization"
+                      ? "/dashboard/organization"
+                      : "/dashboard/user"
+                  }
                   className="bg-[#132333] text-[#e9e7e3] font-semibold py-2 px-4 rounded-lg hover:bg-[#0a1826] transition"
                 >
                   Go to Dashboard
                 </Link>
+
                 <button
                   onClick={() => {
                     logout();
