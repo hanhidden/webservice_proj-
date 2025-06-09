@@ -3,6 +3,9 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional
 from datetime import datetime
 
+
+
+
 class DemographicsSchema(BaseModel):
     first_name: str
     last_name: str
@@ -39,3 +42,20 @@ class VictimOutSchema(CreateVictimSchema):
     id: str
     created_at: str
     updated_at: str
+
+
+
+class RiskAssessmentPatchSchema(BaseModel):
+    level: Optional[str] = None
+    threats: Optional[List[str]] = None
+    protection_needed: Optional[bool] = None
+
+class SupportServicePatchSchema(BaseModel):
+    type: Optional[str] = None
+    provider: Optional[str] = None
+    status: Optional[str] = None
+
+class VictimPatchSchema(BaseModel):
+    risk_assessment: Optional[RiskAssessmentPatchSchema] = None
+    support_services: Optional[List[SupportServicePatchSchema]] = None
+
