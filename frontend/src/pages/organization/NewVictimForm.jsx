@@ -162,12 +162,35 @@ export default function NewVictimForm() {
     });
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   console.log("Submitting formData:", formData);
+  //   try {
+  //     await axios.post("http://localhost:8000/api/victims", formData);
+  //     alert("Victim created successfully!");
+  //   } catch (err) {
+  //     console.error(err.response?.data || err.message);
+  //     alert(
+  //       "Error creating victim: " + (err.response?.data?.detail || err.message)
+  //     );
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Submitting formData:", formData);
     try {
       await axios.post("http://localhost:8000/api/victims", formData);
       alert("Victim created successfully!");
+
+      // Reset form fields
+      setFormData(initialFormData);
+
+      // Show success message (optional)
+      setSuccessMessage("Victim created successfully!");
+
+      // Return to step 1
+      setStep(1);
     } catch (err) {
       console.error(err.response?.data || err.message);
       alert(
@@ -177,6 +200,13 @@ export default function NewVictimForm() {
   };
 
   const totalSteps = 6;
+
+  const [successMessage, setSuccessMessage] = useState("");
+  const initialFormData = {
+    name: "",
+    age: "",
+    // ...
+  };
 
   return (
     <>
@@ -539,7 +569,7 @@ export default function NewVictimForm() {
                       <button
                         type="button"
                         onClick={() => removeSupportService(index)}
-                        className="mt-2 bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                        className="mt-2 bg-[#fbbe24bd] text-white px-2 py-1 rounded hover:bg-[#fbbe247a]"
                       >
                         Remove
                       </button>
@@ -548,7 +578,7 @@ export default function NewVictimForm() {
                   <button
                     type="button"
                     onClick={addSupportService}
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    className="bg-[#fbbe24bd] text-white px-4 py-2 rounded hover:bg-[#fbbe247a]"
                   >
                     Add Support Service
                   </button>
@@ -570,7 +600,7 @@ export default function NewVictimForm() {
                   <button
                     type="button"
                     onClick={handleNext}
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ml-auto"
+                    className="bg-[#fbbe24bd] text-white px-4 py-2 rounded hover:bg-[#fbbe247a] ml-auto"
                   >
                     Next
                   </button>

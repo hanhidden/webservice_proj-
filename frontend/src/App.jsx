@@ -5,8 +5,9 @@ import UserDashboard from "./pages/user/UserDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import SecretariaDashboard from "./pages/secrateria/SecretariaDashboard";
 import OrganizationDashboard from "./pages/organization/OrganizationDashboard";
-import NewVictimForm from './pages/organization/NewVictimForm';
+import NewVictimForm from "./pages/organization/NewVictimForm";
 import { useAuth } from "./auth";
+import VictimList from "./pages/organization/VictimList"; // adjust path accordingly
 
 function App() {
   const { user } = useAuth();
@@ -19,11 +20,11 @@ function App() {
         path="/"
         element={user ? <UserDashboard /> : <Navigate to="/login" />}
       />
-
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
-       <Route path="/victims/new" element={<NewVictimForm />} />
-
+      <Route path="/victims/new" element={<NewVictimForm />} />
+      // ... inside your router setup
+      <Route path="/victims" element={<VictimList />} />
       {/* Role-based dashboard route */}
       <Route
         path="/dashboard/:role"
@@ -47,7 +48,6 @@ function App() {
           )
         }
       />
-
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
