@@ -18,3 +18,6 @@ print("Type:", type(MONGO_DB_NAME))
 
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL)
 db = client[MONGO_DB_NAME]
+
+async def get_database():
+    return db
