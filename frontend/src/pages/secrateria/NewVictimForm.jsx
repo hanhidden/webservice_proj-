@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
-import Header from "../../components/organization_dashboard/org_header";
-import Sidebar from "../../components/organization_dashboard/org_sidebar";
+// import Header from "../../components/organization_dashboard/org_header";
+// import Sidebar from "../../components/organization_dashboard/org_sidebar";
+
+import Sidebar from "../../components/user_homepage/Sidebar";
+import Header from "../../components/All/header";
+import { useAuth } from "../../auth";
+import { Link } from "react-router-dom";
+import { IoArrowBackOutline } from "react-icons/io5"; 
 
 const threatOptions = [
   "intimidation",
@@ -32,6 +38,8 @@ const ethnicities = [
 const occupations = ["Student", "Employed", "Unemployed", "Retired"];
 
 export default function NewVictimForm() {
+  const { user } = useAuth();
+
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     type: "",
@@ -212,9 +220,16 @@ export default function NewVictimForm() {
     <>
       <Header />
       <div className="flex h-screen">
-        <Sidebar />
+        <Sidebar role={user?.role || "user"} />
 
         <main className="flex-1 overflow-y-auto bg-[#f7f5f1] p-8">
+          <Link
+            to="/secretaria/victims/"
+            className="flex items-center space-x-2  text-[#132333] px-4 py-2 rounded-md hover:text-[#1323339f] transition-colors  w-fit"
+          >
+            <IoArrowBackOutline size={20} />
+            <span className="font-medium">Back</span>
+          </Link>
           <div className="flex justify-center mb-6">
             {Array.from({ length: totalSteps }, (_, i) => (
               <div
