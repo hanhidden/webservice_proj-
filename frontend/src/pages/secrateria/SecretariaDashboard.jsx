@@ -1,9 +1,20 @@
-import React from 'react';
+import React from "react";
+import Sidebar from "../../components/user_homepage/Sidebar";
+
+
+import "./SecretariaDashboard.css";
+import { useAuth } from "../../auth";
 
 function SecretariaDashboard() {
+  const { user } = useAuth(); // user should have a role property
+
   return (
-    <div className="flex items-center justify-center h-screen">
-      <h1 className="text-4xl font-bold">Hi, I'm Secretaria</h1>
+    <div className="dashboard-container">
+      <Sidebar role={user?.role || "user"} />
+      <div className="dashboard-content">
+        <h1>Welcome, {user?.name || "User"}!</h1>
+        <p>Select a tab from the sidebar to manage the system.</p>
+      </div>
     </div>
   );
 }

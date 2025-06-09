@@ -15,21 +15,21 @@ export default function OrgSidebar() {
         <li>
             <Link
             to="/dashboard/organization"
-            className="flex items-center space-x-2 hover:bg-[#fbbe247a] px-3 py-2 rounded-md transition-colors"
+            className="flex items-center space-x-2 hover:bg-[#0d1b2a] hover:text-white px-3 py-2 rounded-md transition-colors"
           >
             <AiOutlineHome   size={24} />
             <span>Home</span>
           </Link>
           <Link
             to="#"
-            className="flex items-center space-x-2 hover:bg-[#fbbe247a] px-3 py-2 rounded-md transition-colors"
+            className="flex items-center space-x-2 hover:bg-[#0d1b2a] hover:text-white px-3 py-2 rounded-md transition-colors"
           >
             <TbReportSearch size={24} />
             <span>Reports</span>
           </Link>
           <Link
             to="#"
-            className="flex items-center space-x-2 hover:bg-[#fbbe247a] px-3 py-2 rounded-md transition-colors"
+            className="flex items-center space-x-2 hover:bg-[#0d1b2a] hover:text-white px-3 py-2 rounded-md transition-colors"
           >
             <ImStatsDots size={18} />
 
@@ -38,7 +38,7 @@ export default function OrgSidebar() {
 
            <Link
             to="/victims/new"
-            className="flex items-center space-x-2 hover:bg-[#fbbe247a] px-3 py-2 rounded-md transition-colors"
+            className="flex items-center space-x-2 hover:bg-[#0d1b2a] hover:text-white px-3 py-2 rounded-md transition-colors"
           >
             <IoDocumentTextOutline size={20} />
             <span>New Victim/Witness</span>
@@ -47,7 +47,7 @@ export default function OrgSidebar() {
             {/* New Link to Victim/Witness List */}
           <Link
             to="/victims"
-            className="flex items-center space-x-2 hover:bg-[#fbbe247a] px-3 py-2 rounded-md transition-colors"
+            className="flex items-center space-x-2 hover:bg-[#0d1b2a] hover:text-white px-3 py-2 rounded-md transition-colors"
           >
             <IoPersonOutline size={20} />
             <span>Victim/Witness List</span>
