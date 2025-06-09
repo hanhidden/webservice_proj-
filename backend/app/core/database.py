@@ -5,9 +5,12 @@ from dotenv import load_dotenv
 import os
 from pathlib import Path
 
+from motor.motor_asyncio import AsyncIOMotorGridFSBucket
+
 # Explicitly give the path to the .env file
 env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
+
 
 MONGO_URL = os.getenv("MONGO_URL")
 MONGO_DB_NAME = os.getenv("MONGO_DB_NAME")
@@ -18,6 +21,9 @@ print("Type:", type(MONGO_DB_NAME))
 
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL)
 db = client[MONGO_DB_NAME]
+
+# Create GridFS bucket instance for file storage
+gridfs_bucket = AsyncIOMotorGridFSBucket(db)
 
 async def get_database():
     return db

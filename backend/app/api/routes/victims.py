@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 
 
 router = APIRouter()
+# router = APIRouter(prefix="/victims", tags=["Victimes"])
 
 
 

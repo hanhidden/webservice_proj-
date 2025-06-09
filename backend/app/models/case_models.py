@@ -1,53 +1,43 @@
-#.\models\case_models.py
-from pydantic import BaseModel, Field, GetCoreSchemaHandler, GetJsonSchemaHandler
-from pydantic_core import core_schema
-from typing import Optional, Any
+from pydantic import BaseModel, Field
+from typing import List, Optional
 from bson import ObjectId
+from datetime import datetime
+from .shared import PyObjectId  # Move your PyObjectId class into shared.py
 
+class Evidence(BaseModel):
+    type: str
+    url: str
+    description: Optional[str]
+    date_captured: datetime
 
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_pydantic_core_schema__(
-        cls, source_type: Any, handler: GetCoreSchemaHandler
-    ) -> core_schema.CoreSchema:
-        return core_schema.json_or_python_schema(
-            json_schema=core_schema.str_schema(),
-            python_schema=core_schema.no_info_after_validator_function(
-                cls.validate, core_schema.str_schema()
-            ),
-            serialization=core_schema.plain_serializer_function_ser_schema(str),
-        )
-
-    @classmethod
-    def validate(cls, v: Any) -> ObjectId:
-        if isinstance(v, ObjectId):
-            return v
-        if not ObjectId.is_valid(v):
-            raise ValueError(f"Invalid ObjectId: {v}")
-        return ObjectId(v)
-
-    @classmethod
-    def __get_pydantic_json_schema__(
-        cls, core_schema: core_schema.CoreSchema, handler: GetJsonSchemaHandler
-    ) -> dict[str, Any]:
-        return {"type": "string"}
-
+class Perpetrator(BaseModel):
+    name: str
+    type: str  # e.g. "military_unit", "individual"
 
 class Case(BaseModel):
     id: Optional[PyObjectId] = Field(default=None, alias="_id")
+    case_id: str
     title: str
     description: Optional[str] = None
-    reporter: str
+    violation_types: List[str]
+    status: str
+    priority: Optional[str]
+    date_occurred: datetime
+    date_reported: datetime
+    victims: List[PyObjectId]
+    perpetrators: List[Perpetrator]
+    evidence: List[Evidence]
+    list_of_reports_IDs: List[int]
+    created_by: PyObjectId
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     model_config = {
         "arbitrary_types_allowed": True,
         "json_encoders": {ObjectId: str},
-        "populate_by_name": True,
-        "schema_extra": {
-            "example": {
-                "title": "Unlawful Detention",
-                "description": "The individual was detained without trial.",
-                "reporter": "John Doe"
-            }
-        }
+        "populate_by_name": True
     }
+
+class CaseStatusHistory(BaseModel):
+    case_id: str
+    history: List[dict]  # You can make this a structured model too
