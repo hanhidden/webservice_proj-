@@ -1,13 +1,18 @@
-
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { IoPersonOutline } from "react-icons/io5";
 import { AiOutlineClose } from "react-icons/ai";
-import Header from "../../components/organization_dashboard/org_header";
-import Sidebar from "../../components/organization_dashboard/org_sidebar";
+// import Header from "../../components/organization_dashboard/org_header";
+// import Sidebar from "../../components/organization_dashboard/org_sidebar";
+import { useAuth } from "../../auth";
+import Sidebar from "../../components/user_homepage/Sidebar";
+import Header from "../../components/All/header";
+import { Link } from "react-router-dom";
+import { IoArrowBackOutline } from "react-icons/io5"; // Add this import
 
 export default function VictimList() {
+  const { user } = useAuth();
+
   const [people, setPeople] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedPerson, setSelectedPerson] = useState(null);
@@ -61,15 +66,25 @@ export default function VictimList() {
 
   // Apply filtering based on sortOrder
   const filteredPeople = people.filter((person) =>
-    sortOrder === "All" ? true : person.type.toLowerCase() === sortOrder.toLowerCase()
+    sortOrder === "All"
+      ? true
+      : person.type.toLowerCase() === sortOrder.toLowerCase()
   );
 
   return (
     <>
       <Header />
       <div className="flex h-screen">
-        <Sidebar />
+        <Sidebar role={user?.role || "user"} />
         <main className="flex-1 overflow-y-auto bg-[#f7f5f1] p-8">
+
+           <Link
+            to="/secretaria/victims/"
+            className="flex items-center space-x-2  text-[#132333] px-4 py-2 rounded-md hover:text-[#1323339f] transition-colors  w-fit"
+          >
+            <IoArrowBackOutline size={20} />
+            <span className="font-medium">Back</span>
+          </Link>
           <div className="flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-2xl font-bold">Victim & Witness List</h1>
@@ -99,7 +114,9 @@ export default function VictimList() {
                 >
                   <IoPersonOutline size={40} className="text-gray-600" />
                   <div>
-                    <p className="font-semibold truncate">ID: {id.slice(0, 8)}...</p>
+                    <p className="font-semibold truncate">
+                      ID: {id.slice(0, 8)}...
+                    </p>
                     <p className="text-sm text-gray-600 capitalize">{type}</p>
                   </div>
                 </div>
@@ -127,16 +144,25 @@ export default function VictimList() {
                       <div className="space-y-2">
                         <DetailRow label="ID" value={selectedPerson.id} />
                         <DetailRow label="Type" value={selectedPerson.type} />
-                        <DetailRow label="Created At" value={selectedPerson.created_at} />
-                        <DetailRow label="Updated At" value={selectedPerson.updated_at} />
+                        <DetailRow
+                          label="Created At"
+                          value={selectedPerson.created_at}
+                        />
+                        <DetailRow
+                          label="Updated At"
+                          value={selectedPerson.updated_at}
+                        />
 
                         {/* Render additional details dynamically */}
                         {Object.entries(selectedPerson)
                           .filter(
                             ([key]) =>
-                              !["id", "type", "created_at", "updated_at"].includes(
-                                key
-                              )
+                              ![
+                                "id",
+                                "type",
+                                "created_at",
+                                "updated_at",
+                              ].includes(key)
                           )
                           .map(([key, value]) => (
                             <div key={key}>
@@ -164,10 +190,6 @@ export default function VictimList() {
                 </div>
               </div>
             )}
-
-
-
-            
           </div>
         </main>
       </div>
