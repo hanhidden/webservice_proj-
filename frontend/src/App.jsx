@@ -63,10 +63,13 @@ import UserDashboard from "./pages/user/UserDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import SecretariaDashboard from "./pages/secrateria/SecretariaDashboard";
 import OrganizationDashboard from "./pages/organization/OrganizationDashboard";
-import VictimForm from "./pages/secrateria/NewVictimForm";
+import VictimForm from "./pages/admin/NewVictimForm";
 import { useAuth } from "./auth";
-import VictimList from "./pages/secrateria/VictimList"; // adjust path accordingly
-import Sec_managevictims from "./pages/secrateria/Sec_managevictims";
+import VictimList from "./pages/admin/VictimList"; // adjust path accordingly
+import Admin_managevictims from "./pages/admin/Admin_managevictims";
+import UpdateVictims from "./pages/admin/UpdateVictims";
+import UpdateVictimform from "./pages/admin/UpdateVictimform";
+import RiskHistory from "./pages/admin/RiskHistory";
 
 function App() {
   const { user } = useAuth();
@@ -93,19 +96,25 @@ function App() {
     <Routes>
       {/* Default route depends on user role */}
       <Route path="/" element={getDefaultDashboard()} />
-
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
-
-
-    
-      <Route path="/secretaria/victims" element={<Sec_managevictims/>} />
-       {/* Victims Management */}
-        <Route path="/secretaria/victims/list" element={<VictimList />} />
-        <Route path="/secretaria/victims/new" element={<VictimForm />} />
+      {/* <Route path="/secretaria/victims" element={<Sec_managevictims />} /> */}
+      <Route path="/admin/victims" element={<Admin_managevictims />} />
+      {/* Victims Management */}
+      {/* <Route path="/secretaria/victims/list" element={<VictimList />} />
+      <Route path="/secretaria/victims/new" element={<VictimForm />} /> */}
 
 
 
+      <Route path="/admin/victims/list" element={<VictimList />} />
+
+
+      <Route path="/admin/victims/new" element={<VictimForm />} />
+      <Route path="/admin/victims/update" element={<UpdateVictims />} />
+
+      <Route path="/admin/victims/update/:id" element={<UpdateVictimform />} />
+
+      <Route path="/admin/victims/risk-history/:id" element={<RiskHistory />} />
       {/* Role-based dashboard route (explicit) */}
       <Route
         path="/dashboard/:role"
@@ -121,7 +130,6 @@ function App() {
           )
         }
       />
-
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

@@ -2,15 +2,6 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
 
-
-//  {/* New Link to Victim/Witness List */}
-//           <Link
-//             to="/victims"
-//             className="flex items-center space-x-2 hover:bg-[#0d1b2a] hover:text-white px-3 py-2 rounded-md transition-colors"
-//           >
-//             <IoPersonOutline size={20} />
-//             <span>Victim/Witness List</span>
-//           </Link>
 const roleTabs = {
   secretaria: [
     { to: "/dashboard/secretaria", label: "Dashboard" },
@@ -22,6 +13,9 @@ const roleTabs = {
   admin: [
     { to: "/dashboard/admin", label: "Admin Dashboard" },
     { to: "/admin/users", label: "Manage Users" },
+    { to: "/admin/cases", label: "Manage Cases" },
+    { to: "/admin/victims", label: "Manage Victims" },
+    { to: "/admin/view_reports", label: "View Reports" },
     { to: "/admin/settings", label: "Settings" },
   ],
   organization: [
@@ -35,7 +29,7 @@ function Sidebar({ role = "user" }) {
   const tabs = roleTabs[role] || [];
 
   return (
-    <div className="sidebar">
+    <div className="sidebar flex flex-col">
       <h2 className="sidebar-title">
         {role.charAt(0).toUpperCase() + role.slice(1)}
       </h2>
