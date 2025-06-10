@@ -1,7 +1,7 @@
 .sidebar {
   width: 250px;
   height: 100vh;
-  background-color: rgb(233, 231, 227); /* light beige */
+  background-color: #e9e7e3; /* light beige */
   color: rgb(13, 27, 42); /* dark blue */
   display: flex;
   flex-direction: column;

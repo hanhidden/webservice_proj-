@@ -21,7 +21,7 @@ function Admin_managevictims() {
           <div className="flex gap-4">
             <Link
               to="/admin/victims/new"
-              className="flex flex-col items-center justify-center bg-[#1a2f4f] text-white w-32 h-32 rounded-lg  hover:bg-[#2a4c80] transition-colors shadow-md"
+              className="flex flex-col items-center justify-center bg-[#1a2f4f] text-white rounded-xl w-full h-48 hover:bg-[#2a4c80] transition transform hover:scale-105 shadow-lg border-2 border-transparent hover:border-[#fbbe24bd]"
             >
               <IoDocumentTextOutline size={40} />
               <span className="mt-2 text-center text-sm font-medium">
@@ -31,7 +31,7 @@ function Admin_managevictims() {
 
             <Link
               to="/admin/victims/list"
-              className="flex flex-col items-center justify-center bg-[#1a2f4f] text-white w-32 h-32 rounded-lg hover:bg-[#2a4c80] transition-colors shadow-md"
+              className="flex flex-col items-center justify-center bg-[#1a2f4f] text-white rounded-xl w-full h-48 hover:bg-[#2a4c80] transition transform hover:scale-105 shadow-lg border-2 border-transparent hover:border-[#fbbe24bd]"
             >
               <IoPersonOutline size={40} />
               <span className="mt-2 text-center text-sm font-medium">
