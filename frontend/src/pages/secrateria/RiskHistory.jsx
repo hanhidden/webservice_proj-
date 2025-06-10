@@ -54,7 +54,7 @@ export default function RiskHistory() {
           ) : (
             <>
               <Link
-                to="/admin/victims/update"
+                to="/secretaria/victims/update"
                 className="flex items-center space-x-2 text-[#132333] px-4 py-2 rounded-md hover:text-[#1323339f] transition-colors w-fit mb-4"
               >
                 <IoArrowBackOutline size={20} />
@@ -92,7 +92,7 @@ export default function RiskHistory() {
       No risk assessment history found.
     </p>
     <Link
-      to={`/admin/victims/update/${id}`}
+      to={`/secretaria/victims/update/${id}`}
       className="inline-block bg-[#fbbe24bd] text-white text-center py-1 px-4 rounded hover:bg-[#fbbe247a] transition-colors"
     >
       Update Risk assessment

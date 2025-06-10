@@ -9,7 +9,7 @@ from app.core.database import get_database
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi.responses import JSONResponse
 from app.schemas.victim_schemas import VictimPatchSchema
-
+from bson import ObjectId
 
 
 router = APIRouter()
@@ -35,27 +35,33 @@ async def create_victim(victim: CreateVictimSchema, db: AsyncIOMotorDatabase = D
 
     # Insert victim
     result = await db.victims.insert_one(data)
-    victim_id = str(result.inserted_id)
+    victim_id = result.inserted_id  # keep as ObjectId
 
     # Insert into victim_risk_assessment
     risk_data = {
-        "victim_id": victim_id,
+        "victim_id": str(victim_id),  # store victim id as string here if needed
         "risk_assessment": data["risk_assessment"],
         "support_services": data.get("support_services", []),
         "role": data["type"],  # victim or witness
         "created_at": now,
         "updated_at": now
     }
-
     await db.victim_risk_assessment.insert_one(risk_data)
 
+    # Append victim_id to each corresponding case in the cases collection
+    cases_involved = data.get("cases_involved", [])
+    for case_id in cases_involved:
+        await db.cases.update_one(
+            {"case_id": case_id},
+            {"$addToSet": {"victims": victim_id}}  # push ObjectId directly
+        )
+
     return VictimOutSchema(
-        id=victim_id,
+        id=str(victim_id),
         **victim.dict(),
         created_at=str(now),
         updated_at=str(now)
     )
-
 
 
 @router.get("/{victim_id}", response_model=VictimOutSchema)
@@ -150,6 +156,7 @@ async def update_victim(
 
 @router.get("/risk-history/{victim_id}")
 async def get_risk_history(victim_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
+
     """
     Get risk assessment history for a given victim.
     """
@@ -176,3 +183,26 @@ async def get_risk_history(victim_id: str, db: AsyncIOMotorDatabase = Depends(ge
         })
 
     return JSONResponse(content=risk_history)
+
+
+
+@router.get("/case/{case_id}", response_model=list[VictimOutSchema])
+async def get_victims_by_case(case_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
+    cursor = db.victims.find({"cases_involved": case_id})
+    victims = []
+
+    async for victim in cursor:
+        victim["id"] = str(victim.pop("_id"))
+        # Convert datetime fields to isoformat strings
+        victim["created_at"] = victim["created_at"].isoformat() if "created_at" in victim else None
+        victim["updated_at"] = victim["updated_at"].isoformat() if "updated_at" in victim else None
+
+        # Defensive defaults
+        victim["demographics"] = victim.get("demographics")
+        victim["contact_info"] = victim.get("contact_info")
+        victim["risk_assessment"] = victim.get("risk_assessment")
+        victim["support_services"] = victim.get("support_services", [])
+
+        victims.append(VictimOutSchema(**victim))
+
+    return victims
