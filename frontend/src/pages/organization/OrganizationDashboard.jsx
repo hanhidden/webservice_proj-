@@ -1,19 +1,24 @@
 import React from "react";
-import Sidebar from "../../components/organization_dashboard/org_sidebar";
-import Header from "../../components/organization_dashboard/org_header";
+// import Sidebar from "../../components/organization_dashboard/org_sidebar";
+// import Header from "../../components/organization_dashboard/org_header";
+
+import Sidebar from "../../components/user_homepage/Sidebar";
+import Header from "../../components/All/header";
+import { useAuth } from "../../auth";
 
 function OrganizationDashboard() {
+  const { user } = useAuth();
   return (
     <>
-      <Header/>
-      <div className="flex h-screen">
-        {/* Sidebar on the left */}
-        <Sidebar />
-
-        {/* Main content on the right */}
-        <div className="flex-1 flex items-center justify-center bg-[#f7f5f1]">
-          <h1 className="text-4xl font-bold">Hi, I'm Organization</h1>
-        </div>
+      <Header />
+      <div className="flex">
+        <Sidebar role={user?.role || "user"} />
+        <main className="flex-grow p-8 bg-gray-100 min-h-screen">
+          <h1 className="text-2xl font-bold mb-4">
+            Welcome, {user?.role || "User"}!
+          </h1>
+          <p>Select a tab from the sidebar to manage the system.</p>
+        </main>
       </div>
     </>
   );
