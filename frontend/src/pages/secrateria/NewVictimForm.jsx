@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-// import Header from "../../components/organization_dashboard/org_header";
-// import Sidebar from "../../components/organization_dashboard/org_sidebar";
+
 
 import Sidebar from "../../components/user_homepage/Sidebar";
 import Header from "../../components/All/header";
 import { useAuth } from "../../auth";
 import { Link } from "react-router-dom";
-import { IoArrowBackOutline } from "react-icons/io5"; 
+import { IoArrowBackOutline } from "react-icons/io5";
+import { TrashIcon } from "@heroicons/react/24/outline"; // adjust path as needed
 
 const threatOptions = [
   "intimidation",
@@ -39,6 +39,9 @@ const occupations = ["Student", "Employed", "Unemployed", "Retired"];
 
 export default function NewVictimForm() {
   const { user } = useAuth();
+
+  const [availableCases, setAvailableCases] = useState([]);
+  const [loadingCases, setLoadingCases] = useState(true);
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -170,20 +173,21 @@ export default function NewVictimForm() {
     });
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   console.log("Submitting formData:", formData);
-  //   try {
-  //     await axios.post("http://localhost:8000/api/victims", formData);
-  //     alert("Victim created successfully!");
-  //   } catch (err) {
-  //     console.error(err.response?.data || err.message);
-  //     alert(
-  //       "Error creating victim: " + (err.response?.data?.detail || err.message)
-  //     );
-  //   }
-  // };
 
+  
+  useEffect(() => {
+    async function loadCases() {
+      try {
+        const res = await axios.get("http://127.0.0.1:8000/api/cases/getall");
+        setAvailableCases(res.data.case_ids || []);
+      } catch (err) {
+        console.error("Failed to load case IDs:", err);
+      } finally {
+        setLoadingCases(false);
+      }
+    }
+    loadCases();
+  }, []);
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Submitting formData:", formData);
@@ -224,7 +228,7 @@ export default function NewVictimForm() {
 
         <main className="flex-1 overflow-y-auto bg-[#f7f5f1] p-8">
           <Link
-            to="/admin/victims/"
+            to="/secretaria/victims/"
             className="flex items-center space-x-2  text-[#132333] px-4 py-2 rounded-md hover:text-[#1323339f] transition-colors  w-fit"
           >
             <IoArrowBackOutline size={20} />
@@ -425,24 +429,82 @@ export default function NewVictimForm() {
               )}
 
               {/* STEP 4 */}
+
               {step === 4 && (
-                <div>
+                <div className="space-y-4">
                   <label className="block font-semibold mb-1">
-                    Cases Involved (comma-separated IDs):
+                    Cases Involved :
                   </label>
-                  <input
-                    name="cases_involved"
-                    value={formData.cases_involved.join(", ")}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        cases_involved: e.target.value
-                          .split(",")
-                          .map((s) => s.trim()),
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded px-3 py-2"
-                  />
+
+                  <p className="text-sm text-gray-500">
+                    Select case IDs from the dropdown, or edit the text field
+                    directly. Leave empty if no case yet.
+                  </p>
+                  {loadingCases ? (
+                    <p className="text-gray-600">Loading cases…</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {/* Dropdown to add a case */}
+                      <select
+                        value=""
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val) {
+                            if (formData.cases_involved.includes(val)) {
+                              alert(`Case ID "${val}" is already selected.`);
+                            } else {
+                              setFormData((prev) => ({
+                                ...prev,
+                                cases_involved: [...prev.cases_involved, val],
+                              }));
+                            }
+                          }
+                        }}
+                        className="w-full border border-gray-300 rounded px-3 py-2"
+                      >
+                        <option value="">Select a case to add</option>
+                        {availableCases.map(({ _id, case_id }) => (
+                          <option key={_id} value={case_id}>
+                            {case_id}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Editable text input */}
+                      <div className="flex space-x-2">
+                        <input
+                          type="text"
+                          value={formData.cases_involved.join(", ")}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              cases_involved: e.target.value
+                                .split(",")
+                                .map((s) => s.trim())
+                                .filter((s) => s.length > 0),
+                            }))
+                          }
+                          placeholder="Enter case IDs, separated by commas"
+                          className="w-full border border-gray-300 rounded px-3 py-2"
+                        />
+
+                        {/* Clear button */}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              cases_involved: [],
+                            }))
+                          }
+                          className="flex items-center space-x-1 text-red-600 bg-red-100 border border-red-300 px-3 py-2 rounded hover:bg-red-50 hover:border-red-400 transition"
+                        >
+                          <TrashIcon className="w-5 h-5" />
+                          <span>Clear</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

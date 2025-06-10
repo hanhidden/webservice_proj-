@@ -42,15 +42,7 @@ function Admin_managevictims() {
               </span>
             </Link>
 
-              <Link
-              to="/admin/victims/update"
-              className="flex flex-col items-center justify-center bg-[#1a2f4f] text-white w-32 h-32 rounded-lg hover:bg-[#2a4c80] transition-colors shadow-md"
-            >
-              <MdOutlinePersonAdd size={40} />
-              <span className="mt-2 text-center text-sm font-medium">
-              Update Risk Assessments
-              </span>
-            </Link>
+            
           </div>
         </main>
       </div>

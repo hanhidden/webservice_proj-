@@ -117,7 +117,7 @@
 #         },
 #     )
 
-# app/api/routes/cases.py
+# app/api/routes/case_router.py
 
 from fastapi import APIRouter, HTTPException, Body, UploadFile, File, Query, Depends
 from fastapi.responses import JSONResponse
@@ -131,6 +131,21 @@ from app.core.database import get_database
 from app.core.database import gridfs_bucket  # Assuming you have a shared GridFS bucket
 
 router = APIRouter()
+
+
+
+# eliaa keep this when u mergre 
+@router.get("/getall")
+async def get_all_case_ids(db: AsyncIOMotorDatabase = Depends(get_database)):
+    """
+    Returns all case IDs and their MongoDB _id from the database.
+    """
+    cases_cursor = db.cases.find({}, {"case_id": 1, "_id": 1})  # Project both 'case_id' and '_id'
+    case_ids = [
+        {"_id": str(doc["_id"]), "case_id": doc["case_id"]}
+        async for doc in cases_cursor
+    ]
+    return {"case_ids": case_ids}
 
 
 @router.post("/")
@@ -249,3 +264,4 @@ async def upload_evidence(
             "evidence": new_evidence,
         },
     )
+

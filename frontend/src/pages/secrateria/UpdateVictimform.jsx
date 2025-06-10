@@ -144,7 +144,7 @@ export default function UpdateVictimform() {
          <main className="flex-1 overflow-y-auto p-6 md:p-8">
           <div className="max-w-4xl mx-auto">
             <Link
-              to="/admin/victims/update"
+              to="/secretaria/victims/update"
               className="flex items-center space-x-2 text-gray-700 mb-4 hover:text-gray-500 transition-colors"
             >
               <IoArrowBackOutline size={20} />

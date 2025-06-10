@@ -77,7 +77,7 @@ export default function UpdateVictims() {
         <Sidebar role={user?.role || "user"} />
         <main className="flex-1 overflow-y-auto bg-gray-100 p-8">
           <Link
-            to="/admin/victims/"
+            to="/secretaria/victims/"
             className="flex items-center space-x-2  text-[#132333] px-4 py-2 rounded-md hover:text-[#1323339f] transition-colors  w-fit"
           >
             <IoArrowBackOutline size={20} />
@@ -136,7 +136,7 @@ export default function UpdateVictims() {
 
                     {/* Update Button */}
                     <Link
-                      to={`/admin/victims/update/${id}`}
+                      to={`/secretaria/victims/update/${id}`}
                       className="bg-[#fbbe24bd] text-white text-center py-1 roundedhover:bg-[#fbbe247a]"
                     >
                       Update
@@ -144,7 +144,7 @@ export default function UpdateVictims() {
 
                     {/* View Risk History Button */}
                     <Link
-                      to={`/admin/victims/risk-history/${id}`}
+                      to={`/secretaria/victims/risk-history/${id}`}
                       className="bg-gray-600 text-white text-center py-1 rounded hover:bg-gray-700"
                     >
                       View Risk History
