@@ -1,12 +1,9 @@
-
 import React from "react";
 import Sidebar from "../../components/user_homepage/Sidebar";
 import Header from "../../components/All/header";
 import { useAuth } from "../../auth";
 import { IoDocumentTextOutline, IoPersonOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
-import { MdOutlinePersonAdd ,MdOutlinePerson} from "react-icons/md";
-
 
 function Admin_managevictims() {
   const { user } = useAuth();
@@ -38,11 +35,9 @@ function Admin_managevictims() {
             >
               <IoPersonOutline size={40} />
               <span className="mt-2 text-center text-sm font-medium">
-              View Victim/Witness  List
+                View Victim/Witness List
               </span>
             </Link>
-
-            
           </div>
         </main>
       </div>

@@ -8,11 +8,13 @@ import OrganizationDashboard from "./pages/organization/OrganizationDashboard";
 import VictimForm from "./pages/secrateria/NewVictimForm";
 import { useAuth } from "./auth";
 import VictimList from "./pages/secrateria/VictimList"; // adjust path accordingly
-import Admin_managevictims from "./pages/admin/Admin_managevictims";
-import Sec_managevictims from "./pages/secrateria/Sec_managevictims"
+import Adminmanagevictims from "./pages/admin/Admin_managevictims";
+import Secmanagevictims from "./pages/secrateria/Sec_managevictims";
 import UpdateVictims from "./pages/secrateria/UpdateVictims";
 import UpdateVictimform from "./pages/secrateria/UpdateVictimform";
 import RiskHistory from "./pages/secrateria/RiskHistory";
+import AdminNewVictimForm from "./pages/admin/Admin_NewVictimForm";
+import AdminVictimList from "./pages/admin/Admin_VictimList";
 
 function App() {
   const { user } = useAuth();
@@ -41,27 +43,27 @@ function App() {
       <Route path="/" element={getDefaultDashboard()} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
-      <Route path="/secretaria/victims" element={<Sec_managevictims />} />
-      <Route path="/admin/victims" element={<Admin_managevictims />} />
 
+      <Route path="/secretaria/victims" element={<Secmanagevictims />} />
+      <Route path="/admin/victims" element={<Adminmanagevictims />} />
 
-
-      {/* Victims Management */}
-
-
+      {/* Victims Management secretaria */}
       <Route path="/secretaria/victims/list" element={<VictimList />} />
-      <Route path="/secretaria/victims/new" element={<VictimForm />} /> 
-     <Route path="/secretaria/victims/update" element={<UpdateVictims />} />
+      <Route path="/secretaria/victims/new" element={<VictimForm />} />
+      <Route path="/secretaria/victims/update" element={<UpdateVictims />} />
+      <Route
+        path="/secretaria/victims/update/:id"
+        element={<UpdateVictimform />}
+      />
+      <Route
+        path="/secretaria/victims/risk-history/:id"
+        element={<RiskHistory />}
+      />
 
+      {/* Victims Management admin */}
+      <Route path="/admin/victims/list" element={<AdminVictimList />} />
+      <Route path="/admin/victims/new" element={<AdminNewVictimForm />} />
 
-      <Route path="/admin/victims/list" element={<VictimList />} />
-
-
-      <Route path="/admin/victims/new" element={<VictimForm />} />
-
-      <Route path="/secretaria/victims/update/:id" element={<UpdateVictimform />} />
-
-      <Route path="/secretaria/victims/risk-history/:id" element={<RiskHistory />} />
       {/* Role-based dashboard route (explicit) */}
       <Route
         path="/dashboard/:role"
