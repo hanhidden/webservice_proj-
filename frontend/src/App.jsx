@@ -1,61 +1,3 @@
-// import { Routes, Route, Navigate } from "react-router-dom";
-// import LoginPage from "./pages/LoginPage";
-// import SignupPage from "./pages/SignupPage";
-// import UserDashboard from "./pages/user/UserDashboard";
-// import AdminDashboard from "./pages/admin/AdminDashboard";
-// import SecretariaDashboard from "./pages/secrateria/SecretariaDashboard";
-// import OrganizationDashboard from "./pages/organization/OrganizationDashboard";
-// import NewVictimForm from "./pages/organization/NewVictimForm";
-// import { useAuth } from "./auth";
-// import VictimList from "./pages/organization/VictimList"; // adjust path accordingly
-
-// function App() {
-//   const { user } = useAuth();
-
-//   console.log("App user context:", user);
-
-//   return (
-//     <Routes>
-//       <Route
-//         path="/"
-//         element={user ? <UserDashboard /> : <Navigate to="/login" />}
-//       />
-//       <Route path="/login" element={<LoginPage />} />
-//       <Route path="/signup" element={<SignupPage />} />
-//       <Route path="/victims/new" element={<NewVictimForm />} />
-//       // ... inside your router setup
-//       <Route path="/secretaria/victims" element={<VictimList />} />
-//       {/* Role-based dashboard route */}
-//       <Route
-//         path="/dashboard/:role"
-//         element={
-//           user ? (
-//             user.is_approved ? (
-//               user.role === "admin" ? (
-//                 <AdminDashboard />
-//               ) : user.role === "secretaria" ? (
-//                 <SecretariaDashboard />
-//               ) : user.role === "organization" ? (
-//                 <OrganizationDashboard />
-//               ) : (
-//                 <UserDashboard />
-//               )
-//             ) : (
-//               <Navigate to="/login" />
-//             )
-//           ) : (
-//             <Navigate to="/login" />
-//           )
-//         }
-//       />
-//       {/* Catch-all */}
-//       <Route path="*" element={<Navigate to="/" />} />
-//     </Routes>
-//   );
-// }
-
-// export default App;
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
@@ -67,6 +9,8 @@ import VictimForm from "./pages/secrateria/NewVictimForm";
 import { useAuth } from "./auth";
 import VictimList from "./pages/secrateria/VictimList"; // adjust path accordingly
 import Sec_managevictims from "./pages/secrateria/Sec_managevictims";
+import SecretariaManageCases from "./pages/secrateria/SecretariaManageCases";
+import CaseDetailPage from "./pages/secrateria/CaseDetailPage";
 
 function App() {
   const { user } = useAuth();
@@ -97,14 +41,15 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
 
-
-    
-      <Route path="/secretaria/victims" element={<Sec_managevictims/>} />
-       {/* Victims Management */}
-        <Route path="/secretaria/victims/list" element={<VictimList />} />
-        <Route path="/secretaria/victims/new" element={<VictimForm />} />
-
-
+      <Route path="/secretaria/victims" element={<Sec_managevictims />} />
+      {/* Victims Management */}
+      <Route path="/secretaria/victims/list" element={<VictimList />} />
+      <Route path="/secretaria/victims/new" element={<VictimForm />} />
+      <Route
+        path="/secretaria/manage-cases"
+        element={<SecretariaManageCases />}
+      />
+      <Route path="/secretaria/case/:caseId" element={<CaseDetailPage />} />
 
       {/* Role-based dashboard route (explicit) */}
       <Route

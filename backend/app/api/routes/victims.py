@@ -9,6 +9,7 @@ from app.core.database import get_database
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi.responses import JSONResponse
 
+from typing import List, Dict
 
 
 router = APIRouter()
@@ -17,7 +18,7 @@ router = APIRouter()
 
 
 
-@router.get("/all", response_model=list[dict])
+@router.get("/all", response_model=List[Dict])
 async def list_victims(db: AsyncIOMotorDatabase = Depends(get_database)):
     cursor = db.victims.find({}, {"_id": 1, "type": 1})
     victims = []
