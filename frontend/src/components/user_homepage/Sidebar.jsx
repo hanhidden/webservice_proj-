@@ -7,7 +7,8 @@ const roleTabs = {
     { to: "/dashboard/secretaria", label: "Dashboard" },
     { to: "/secretaria/reports", label: "Manage Reports" },
     { to: "/secretaria/victims", label: "Manage Victims" },
-    { to: "/secretaria/cases", label: "Manage Cases" },
+    { to: "/secretaria/manage-cases", label: "Manage Cases" },
+
     { to: "/secretaria/analysis", label: "Analysis & Visualization" },
   ],
   admin: [

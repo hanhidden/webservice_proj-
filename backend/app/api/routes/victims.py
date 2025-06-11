@@ -3,18 +3,19 @@ from fastapi import APIRouter, HTTPException,Depends,Body
 from datetime import datetime
 from bson import ObjectId
 
-from app.schemas.victim_schemas import CreateVictimSchema, VictimOutSchema
+from app.schemas.victim_schemas import CreateVictimSchema, VictimOutSchema, VictimPatchSchema
 from app.core.database import db
 from app.core.database import get_database
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi.responses import JSONResponse
-from app.schemas.victim_schemas import VictimPatchSchema
-from bson import ObjectId
+
+
+from typing import List, Dict
 
 
 router = APIRouter()
 
-@router.get("/all", response_model=list[dict])
+@router.get("/all", response_model=List[Dict])
 async def list_victims(db: AsyncIOMotorDatabase = Depends(get_database)):
     cursor = db.victims.find({}, {"_id": 1, "type": 1})
     victims = []

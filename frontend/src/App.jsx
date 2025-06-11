@@ -8,6 +8,10 @@ import OrganizationDashboard from "./pages/organization/OrganizationDashboard";
 import VictimForm from "./pages/secrateria/NewVictimForm";
 import { useAuth } from "./auth";
 import VictimList from "./pages/secrateria/VictimList"; // adjust path accordingly
+
+import SecretariaManageCases from "./pages/secrateria/SecretariaManageCases";
+import CaseDetailPage from "./pages/secrateria/CaseDetailPage";
+
 import Adminmanagevictims from "./pages/admin/Admin_managevictims";
 import Secmanagevictims from "./pages/secrateria/Sec_managevictims";
 import UpdateVictims from "./pages/secrateria/UpdateVictims";
@@ -16,6 +20,7 @@ import RiskHistory from "./pages/secrateria/RiskHistory";
 import AdminNewVictimForm from "./pages/admin/Admin_NewVictimForm";
 import AdminVictimList from "./pages/admin/Admin_VictimList";
 import Adminmanageuser from "./pages/admin/Admin_manageuser";
+
 
 function App() {
   const { user } = useAuth();
@@ -44,6 +49,16 @@ function App() {
       <Route path="/" element={getDefaultDashboard()} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+
+     
+      {/* Victims Management */}
+      <Route path="/secretaria/victims/list" element={<VictimList />} />
+      <Route path="/secretaria/victims/new" element={<VictimForm />} />
+      <Route
+        path="/secretaria/manage-cases"
+        element={<SecretariaManageCases />}
+      />
+      <Route path="/secretaria/case/:caseId" element={<CaseDetailPage />} />
 
       <Route path="/secretaria/victims" element={<Secmanagevictims />} />
 

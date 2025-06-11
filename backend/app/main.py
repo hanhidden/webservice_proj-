@@ -40,6 +40,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.victims import router as victim_router
 from app.api.routes.case_router import router as case_router
+from app.api.routes.report_router import router as report_router
+
 
 app = FastAPI()
 
@@ -62,4 +64,9 @@ app.include_router(test_connection_router, prefix="/api")
 app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
 app.include_router(users_router, prefix="/api/users", tags=["Users"])  # New router
 app.include_router(victim_router, prefix="/api/victims", tags=["Victims"])
+
 app.include_router(case_router, prefix="/api/cases", tags=["Cases"])
+app.include_router(report_router, prefix="/api/incident_reports", tags=["Incident Reports"])
+
+
+

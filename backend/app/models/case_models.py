@@ -32,11 +32,11 @@ class Case(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-    model_config = {
-        "arbitrary_types_allowed": True,
-        "json_encoders": {ObjectId: str},
-        "populate_by_name": True
-    }
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        allow_population_by_field_name = True
+
 
 class CaseStatusHistory(BaseModel):
     case_id: str

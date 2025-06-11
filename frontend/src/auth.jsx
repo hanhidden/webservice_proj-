@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-
 const AuthContext = createContext(null);
 
 export function useAuth() {
@@ -15,12 +14,15 @@ export function AuthProvider({ children }) {
     const role = localStorage.getItem("role");
     const approved = localStorage.getItem("approved");
     const email = localStorage.getItem("email");
+    const user_id = localStorage.getItem("user_id"); // 👈 added this
 
     if (token && role && approved !== null) {
       setUser({
         email,
         role,
         is_approved: approved === "true",
+        user_id, // 👈 added this
+        access_token: token,
       });
     }
   }, []);
@@ -44,11 +46,13 @@ export function AuthProvider({ children }) {
       localStorage.setItem("role", data.role);
       localStorage.setItem("approved", data.is_approved);
       localStorage.setItem("email", email);
+      localStorage.setItem("user_id", data.user_id); // 👈 store user ID
 
       setUser({
         email,
         role: data.role,
         is_approved: data.is_approved,
+        access_token: data.access_token || data.access_token, // if your API returns token under 'access_token'
       });
 
       return { success: true };
