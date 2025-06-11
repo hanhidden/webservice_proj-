@@ -17,11 +17,26 @@ function SecretariaManageCases() {
     priority: "",
     status: "",
     violationType: "",
+    dateReported: "",
+    dateOccurred: "",
   });
 
   const fetchCases = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/cases/`);
+      const queryParams = new URLSearchParams();
+
+      if (filters.priority) queryParams.append("priority", filters.priority);
+      if (filters.status) queryParams.append("status", filters.status);
+      if (filters.violationType)
+        queryParams.append("violation_type", filters.violationType);
+      if (filters.dateOccurred)
+        queryParams.append("date_occurred", filters.dateOccurred);
+      if (filters.dateReported)
+        queryParams.append("date_reported", filters.dateReported);
+
+      const response = await axios.get(
+        `http://localhost:8000/api/cases/?${queryParams.toString()}`
+      );
       setCases(response.data);
     } catch (error) {
       console.error("Error fetching cases:", error);
@@ -31,7 +46,7 @@ function SecretariaManageCases() {
 
   useEffect(() => {
     fetchCases();
-  }, []);
+  }, [filters]);
 
   const filteredCases = cases.filter((c) => {
     const matchSecretaria = c.assigned_secretaria === user?.user_id;
@@ -91,8 +106,8 @@ function SecretariaManageCases() {
             </button>
           </div>
 
-          {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+          {/* Main Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <input
               name="caseId"
               value={filters.caseId}
@@ -131,6 +146,50 @@ function SecretariaManageCases() {
               className="p-2 rounded border"
             />
           </div>
+
+          {/* Date Filters Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">Date Occurred</label>
+              <input
+                type="date"
+                name="dateOccurred"
+                value={filters.dateOccurred}
+                onChange={handleFilterChange}
+                className="p-2 rounded border w-full"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">Date Reported</label>
+              <input
+                type="date"
+                name="dateReported"
+                value={filters.dateReported}
+                onChange={handleFilterChange}
+                className="p-2 rounded border w-full"
+              />
+            </div>
+          </div>
+
+          {/* Clear Filters Button */}
+          <div className="mb-8">
+            <button
+              onClick={() =>
+                setFilters({
+                  caseId: "",
+                  priority: "",
+                  status: "",
+                  violationType: "",
+                  dateReported: "",
+                  dateOccurred: "",
+                })
+              }
+              className="bg-[#0d1b2a] text-white font-semibold px-6 py-2 rounded hover:brightness-110 transition"
+            >
+              Clear Filters
+            </button>
+          </div>
+
 
           {/* Cases by Status */}
           {["open", "waiting_for_approval", "approved", "closed"].map(

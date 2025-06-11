@@ -43,12 +43,48 @@ async def create_case(case: Case, db: AsyncIOMotorDatabase = Depends(get_databas
     # Return the inserted ID as a string. No full document serialization needed here.
     return {"id": str(result.inserted_id)}
 
+# @router.get("/")
+# async def list_cases(
+#     status: Optional[str] = None,
+#     violation_type: Optional[str] = None,
+#     secretaria_id: Optional[str] = None,
+#     location: Optional[str] = None,
+#     db: AsyncIOMotorDatabase = Depends(get_database)
+# ):
+#     query = {}
+
+#     if status:
+#         query["status"] = status
+
+#     if violation_type:
+#         query["violation_types"] = violation_type
+
+#     if secretaria_id:
+#         try:
+#             query["assigned_secretaria"] = ObjectId(secretaria_id)
+#         except Exception:
+#             raise HTTPException(status_code=400, detail="Invalid secretaria ObjectId")
+
+#     if location:
+#         query["location"] = location
+
+#     cases_cursor = db.cases.find(query)
+#     cases_list = await cases_cursor.to_list(length=1000)
+
+#     # Apply serialization to each case document before returning
+#     serialized_cases = [serialize_case_document(case) for case in cases_list]
+
+#     return JSONResponse(content=serialized_cases)
+
+
 @router.get("/")
 async def list_cases(
     status: Optional[str] = None,
     violation_type: Optional[str] = None,
     secretaria_id: Optional[str] = None,
     location: Optional[str] = None,
+    date_occurred: Optional[str] = Query(None),
+    date_reported: Optional[str] = Query(None),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
     query = {}
@@ -68,15 +104,22 @@ async def list_cases(
     if location:
         query["location"] = location
 
+    if date_occurred:
+        try:
+            query["date_occurred"] = datetime.strptime(date_occurred, "%Y-%m-%d")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date_occurred format")
+
+    if date_reported:
+        try:
+            query["date_reported"] = datetime.strptime(date_reported, "%Y-%m-%d")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date_reported format")
+
     cases_cursor = db.cases.find(query)
     cases_list = await cases_cursor.to_list(length=1000)
-
-    # Apply serialization to each case document before returning
     serialized_cases = [serialize_case_document(case) for case in cases_list]
-
     return JSONResponse(content=serialized_cases)
-
-
 @router.get("/count-by-status")
 async def count_cases_by_status(
     secretaria_id: str = Query(...),
