@@ -1,3 +1,4 @@
+
 from fastapi import APIRouter, HTTPException, Body, UploadFile, File, Query, Depends
 from fastapi.responses import JSONResponse
 from typing import Optional
@@ -13,6 +14,7 @@ from fastapi import Depends, APIRouter
 from app.models.user import User  #  user model
 from bson import json_util
 router = APIRouter()
+
 
 
 def serialize_value(value):
@@ -31,6 +33,23 @@ def serialize_case_document(case_doc):
     if not case_doc:
         return case_doc
     return serialize_value(case_doc)
+
+
+# eliaa keep this when u mergre 
+@router.get("/getall")
+async def get_all_case_ids(db: AsyncIOMotorDatabase = Depends(get_database)):
+    """
+    Returns all case IDs and their MongoDB _id from the database.
+    """
+    cases_cursor = db.cases.find({}, {"case_id": 1, "_id": 1})  # Project both 'case_id' and '_id'
+    case_ids = [
+        {"_id": str(doc["_id"]), "case_id": doc["case_id"]}
+        async for doc in cases_cursor
+    ]
+    return {"case_ids": case_ids}
+
+
+
 @router.post("/")
 async def create_case(case: Case, db: AsyncIOMotorDatabase = Depends(get_database)):
     case_dict = case.dict(by_alias=True)
@@ -43,38 +62,6 @@ async def create_case(case: Case, db: AsyncIOMotorDatabase = Depends(get_databas
     # Return the inserted ID as a string. No full document serialization needed here.
     return {"id": str(result.inserted_id)}
 
-# @router.get("/")
-# async def list_cases(
-#     status: Optional[str] = None,
-#     violation_type: Optional[str] = None,
-#     secretaria_id: Optional[str] = None,
-#     location: Optional[str] = None,
-#     db: AsyncIOMotorDatabase = Depends(get_database)
-# ):
-#     query = {}
-
-#     if status:
-#         query["status"] = status
-
-#     if violation_type:
-#         query["violation_types"] = violation_type
-
-#     if secretaria_id:
-#         try:
-#             query["assigned_secretaria"] = ObjectId(secretaria_id)
-#         except Exception:
-#             raise HTTPException(status_code=400, detail="Invalid secretaria ObjectId")
-
-#     if location:
-#         query["location"] = location
-
-#     cases_cursor = db.cases.find(query)
-#     cases_list = await cases_cursor.to_list(length=1000)
-
-#     # Apply serialization to each case document before returning
-#     serialized_cases = [serialize_case_document(case) for case in cases_list]
-
-#     return JSONResponse(content=serialized_cases)
 
 
 @router.get("/")
@@ -242,3 +229,4 @@ async def upload_evidence(
             "evidence": new_evidence,
         },
     )
+

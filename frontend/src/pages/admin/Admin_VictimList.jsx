@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AiOutlineClose } from "react-icons/ai";
@@ -22,7 +20,7 @@ import {
 } from "react-icons/io5";
 import Loader from "../../components/All/Loader";
 
-export default function VictimList() {
+export default function Admin_VictimList() {
   const { user } = useAuth();
 
   const [people, setPeople] = useState([]);
@@ -221,7 +219,7 @@ export default function VictimList() {
         <Sidebar role={user?.role || "user"} />
         <main className="flex-1 overflow-y-auto bg-gray-100 p-8">
           <Link
-            to="/secretaria/victims/"
+            to="/admin/victims/"
             className="flex items-center space-x-2 text-slate-700 px-4 py-2 rounded-md hover:text-slate-900 transition-colors w-fit"
           >
             <IoArrowBackOutline size={20} />
@@ -619,6 +617,7 @@ export default function VictimList() {
   );
 }
 
+// Enhanced DetailRow Component with boolean handling and better styling
 const DetailRow = ({ icon, label, value, isBooleanValue }) => (
   <div className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-stone-150 hover:shadow-sm transition-shadow duration-200">
     <div className="flex-shrink-0">{icon}</div>

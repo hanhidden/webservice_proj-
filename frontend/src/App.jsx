@@ -8,9 +8,19 @@ import OrganizationDashboard from "./pages/organization/OrganizationDashboard";
 import VictimForm from "./pages/secrateria/NewVictimForm";
 import { useAuth } from "./auth";
 import VictimList from "./pages/secrateria/VictimList"; // adjust path accordingly
-import Sec_managevictims from "./pages/secrateria/Sec_managevictims";
+
 import SecretariaManageCases from "./pages/secrateria/SecretariaManageCases";
 import CaseDetailPage from "./pages/secrateria/CaseDetailPage";
+
+import Adminmanagevictims from "./pages/admin/Admin_managevictims";
+import Secmanagevictims from "./pages/secrateria/Sec_managevictims";
+import UpdateVictims from "./pages/secrateria/UpdateVictims";
+import UpdateVictimform from "./pages/secrateria/UpdateVictimform";
+import RiskHistory from "./pages/secrateria/RiskHistory";
+import AdminNewVictimForm from "./pages/admin/Admin_NewVictimForm";
+import AdminVictimList from "./pages/admin/Admin_VictimList";
+import Adminmanageuser from "./pages/admin/Admin_manageuser";
+
 
 function App() {
   const { user } = useAuth();
@@ -37,11 +47,10 @@ function App() {
     <Routes>
       {/* Default route depends on user role */}
       <Route path="/" element={getDefaultDashboard()} />
-
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
 
-      <Route path="/secretaria/victims" element={<Sec_managevictims />} />
+     
       {/* Victims Management */}
       <Route path="/secretaria/victims/list" element={<VictimList />} />
       <Route path="/secretaria/victims/new" element={<VictimForm />} />
@@ -50,6 +59,31 @@ function App() {
         element={<SecretariaManageCases />}
       />
       <Route path="/secretaria/case/:caseId" element={<CaseDetailPage />} />
+
+      <Route path="/secretaria/victims" element={<Secmanagevictims />} />
+
+      {/* admin */}
+      <Route path="/admin/users" element={<Adminmanageuser />} />
+      <Route path="/admin/victims" element={<Adminmanagevictims />} />
+      {/* Victims Management admin */}
+      <Route path="/admin/victims/list" element={<AdminVictimList />} />
+      <Route path="/admin/victims/new" element={<AdminNewVictimForm />} />
+
+
+
+
+      {/* Victims Management secretaria */}
+      <Route path="/secretaria/victims/list" element={<VictimList />} />
+      <Route path="/secretaria/victims/new" element={<VictimForm />} />
+      <Route path="/secretaria/victims/update" element={<UpdateVictims />} />
+      <Route
+        path="/secretaria/victims/update/:id"
+        element={<UpdateVictimform />}
+      />
+      <Route
+        path="/secretaria/victims/risk-history/:id"
+        element={<RiskHistory />}
+      />
 
       {/* Role-based dashboard route (explicit) */}
       <Route
@@ -66,7 +100,6 @@ function App() {
           )
         }
       />
-
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

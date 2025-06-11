@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-
 import Sidebar from "../../components/user_homepage/Sidebar";
 import Header from "../../components/All/header";
 import { useAuth } from "../../auth";
 import { Link } from "react-router-dom";
 import { IoArrowBackOutline } from "react-icons/io5";
-import { TrashIcon } from "@heroicons/react/24/outline"; // adjust path as needed
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 const threatOptions = [
   "intimidation",
@@ -37,7 +36,7 @@ const ethnicities = [
 ];
 const occupations = ["Student", "Employed", "Unemployed", "Retired"];
 
-export default function NewVictimForm() {
+export default function Admin_NewVictimForm() {
   const { user } = useAuth();
 
   const [availableCases, setAvailableCases] = useState([]);
@@ -112,9 +111,6 @@ export default function NewVictimForm() {
         },
       }));
     } else {
-      // For top-level fields
-
-      // If birthdate is a top-level field, calculate age too
       if (name === "birthdate") {
         const today = new Date();
         const birthDate = new Date(value);
@@ -173,8 +169,6 @@ export default function NewVictimForm() {
     });
   };
 
-
-  
   useEffect(() => {
     async function loadCases() {
       try {
@@ -195,13 +189,10 @@ export default function NewVictimForm() {
       await axios.post("http://localhost:8000/api/victims", formData);
       alert("Victim created successfully!");
 
-      // Reset form fields
       setFormData(initialFormData);
 
-      // Show success message (optional)
       setSuccessMessage("Victim created successfully!");
 
-      // Return to step 1
       setStep(1);
     } catch (err) {
       console.error(err.response?.data || err.message);
@@ -213,7 +204,7 @@ export default function NewVictimForm() {
 
   const totalSteps = 6;
 
-  const [successMessage, setSuccessMessage] = useState("");
+  const [setSuccessMessage] = useState("");
   const initialFormData = {
     name: "",
     age: "",
@@ -226,9 +217,9 @@ export default function NewVictimForm() {
       <div className="flex h-screen">
         <Sidebar role={user?.role || "user"} />
 
-        <main className="flex-1 overflow-y-auto bg-[#f7f5f1] p-8">
+        <main className="flex-1 overflow-y-auto bg-gray-100 p-8">
           <Link
-            to="/secretaria/victims/"
+            to="/admin/victims/"
             className="flex items-center space-x-2  text-[#132333] px-4 py-2 rounded-md hover:text-[#1323339f] transition-colors  w-fit"
           >
             <IoArrowBackOutline size={20} />
@@ -239,12 +230,12 @@ export default function NewVictimForm() {
               <div
                 key={i}
                 className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold mx-1
-        ${
-          step === i + 1
-            ? "bg-[#132333] text-white"
-            : "bg-gray-300 text-gray-700"
-        }
-      `}
+                        ${
+                          step === i + 1
+                            ? "bg-[#132333] text-white"
+                            : "bg-gray-300 text-gray-700"
+                        }
+                    `}
               >
                 {i + 1}
               </div>
