@@ -2,7 +2,6 @@
 from fastapi import APIRouter, HTTPException,Depends,Body
 from datetime import datetime
 from bson import ObjectId
-
 from app.schemas.victim_schemas import CreateVictimSchema, VictimOutSchema, VictimPatchSchema
 from app.core.database import db
 from app.core.database import get_database
@@ -187,7 +186,7 @@ async def get_risk_history(victim_id: str, db: AsyncIOMotorDatabase = Depends(ge
 
 
 
-@router.get("/case/{case_id}", response_model=list[VictimOutSchema])
+@router.get("/case/{case_id}", response_model=List[VictimOutSchema])
 async def get_victims_by_case(case_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
     cursor = db.victims.find({"cases_involved": case_id})
     victims = []
