@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, HTTPException, Body, UploadFile, File, Query, Depends
 from fastapi.responses import JSONResponse
 from typing import Optional
@@ -50,19 +49,6 @@ async def get_all_case_ids(db: AsyncIOMotorDatabase = Depends(get_database)):
 
 
 
-@router.post("/")
-async def create_case(case: Case, db: AsyncIOMotorDatabase = Depends(get_database)):
-    case_dict = case.dict(by_alias=True)
-    # Ensure date_reported and updated_at are datetime objects before insertion
-    if 'date_reported' not in case_dict or not isinstance(case_dict['date_reported'], datetime):
-        case_dict['date_reported'] = datetime.utcnow()
-    case_dict['updated_at'] = datetime.utcnow() # Always set or update this on creation
-
-    result = await db.cases.insert_one(case_dict)
-    # Return the inserted ID as a string. No full document serialization needed here.
-    return {"id": str(result.inserted_id)}
-
-
 
 @router.get("/")
 async def list_cases(
@@ -107,6 +93,10 @@ async def list_cases(
     cases_list = await cases_cursor.to_list(length=1000)
     serialized_cases = [serialize_case_document(case) for case in cases_list]
     return JSONResponse(content=serialized_cases)
+
+
+
+
 @router.get("/count-by-status")
 async def count_cases_by_status(
     secretaria_id: str = Query(...),
@@ -130,6 +120,8 @@ async def count_cases_by_status(
         "waiting_for_approval": waiting_for_approval or 0,
         "approved": approved_cases or 0,
     }
+
+
 
 @router.get("/{case_id}")
 async def get_case(case_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
@@ -158,6 +150,9 @@ async def update_status(
         {"$set": {"status": new_status, "updated_at": datetime.utcnow()}}
     )
     return {"message": "Status updated"}
+
+
+
 
 
 @router.delete("/{case_id}")
@@ -229,4 +224,18 @@ async def upload_evidence(
             "evidence": new_evidence,
         },
     )
+
+
+
+# @router.post("/")
+# async def create_case(case: Case, db: AsyncIOMotorDatabase = Depends(get_database)):
+#     case_dict = case.dict(by_alias=True)
+#     # Ensure date_reported and updated_at are datetime objects before insertion
+#     if 'date_reported' not in case_dict or not isinstance(case_dict['date_reported'], datetime):
+#         case_dict['date_reported'] = datetime.utcnow()
+#     case_dict['updated_at'] = datetime.utcnow() # Always set or update this on creation
+
+#     result = await db.cases.insert_one(case_dict)
+#     # Return the inserted ID as a string. No full document serialization needed here.
+#     return {"id": str(result.inserted_id)}
 
