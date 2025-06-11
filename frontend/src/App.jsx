@@ -15,6 +15,7 @@ import UpdateVictimform from "./pages/secrateria/UpdateVictimform";
 import RiskHistory from "./pages/secrateria/RiskHistory";
 import AdminNewVictimForm from "./pages/admin/Admin_NewVictimForm";
 import AdminVictimList from "./pages/admin/Admin_VictimList";
+import Adminmanageuser from "./pages/admin/Admin_manageuser";
 
 function App() {
   const { user } = useAuth();
@@ -45,7 +46,16 @@ function App() {
       <Route path="/signup" element={<SignupPage />} />
 
       <Route path="/secretaria/victims" element={<Secmanagevictims />} />
+
+      {/* admin */}
+      <Route path="/admin/users" element={<Adminmanageuser />} />
       <Route path="/admin/victims" element={<Adminmanagevictims />} />
+      {/* Victims Management admin */}
+      <Route path="/admin/victims/list" element={<AdminVictimList />} />
+      <Route path="/admin/victims/new" element={<AdminNewVictimForm />} />
+
+
+
 
       {/* Victims Management secretaria */}
       <Route path="/secretaria/victims/list" element={<VictimList />} />
@@ -59,10 +69,6 @@ function App() {
         path="/secretaria/victims/risk-history/:id"
         element={<RiskHistory />}
       />
-
-      {/* Victims Management admin */}
-      <Route path="/admin/victims/list" element={<AdminVictimList />} />
-      <Route path="/admin/victims/new" element={<AdminNewVictimForm />} />
 
       {/* Role-based dashboard route (explicit) */}
       <Route
