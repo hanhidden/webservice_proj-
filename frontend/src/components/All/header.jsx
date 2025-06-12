@@ -55,6 +55,16 @@ export default function AllHeader({ onLogin, onLogout }) {
             >
               Login / Sign Up
             </Link>
+
+            <Link
+                        to="/incidentReportForm"
+                        className="flex items-center hover:text-yellow-600 whitespace-nowrap"
+                      >
+                        <IoDocumentText className="mr-1" /> Report an Incident
+                        
+                      </Link>
+
+            
           </>
         )}
       </nav>

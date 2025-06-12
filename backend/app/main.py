@@ -9,6 +9,9 @@ from app.api.routes.case_router import router as case_router
 from app.api.routes.report_router import router as report_router
 from app.api.routes.analytics_routes import router as analytics_router
 
+from app.api.routes.incident_report import router as incident_report
+from app.api.routes.evidence_route import router as evidence 
+
 
 app = FastAPI()
 
@@ -33,8 +36,11 @@ app.include_router(users_router, prefix="/api/users", tags=["Users"])  # New rou
 app.include_router(victim_router, prefix="/api/victims", tags=["Victims"])
 
 app.include_router(case_router, prefix="/api/cases", tags=["Cases"])
-app.include_router(report_router, prefix="/api/incident_reports", tags=["Incident Reports"])
 
 
 app.include_router(analytics_router, prefix="/api/analytics", tags=["Analytics"])
+app.include_router(incident_report, prefix="/api/incident_report", tags=["incident_report"])
+app.include_router(evidence, prefix="/api/evidence", tags=["evidence"])
+
+
 

@@ -8,6 +8,14 @@ import OrganizationDashboard from "./pages/organization/OrganizationDashboard";
 import VictimForm from "./pages/secrateria/NewVictimForm";
 import { useAuth } from "./auth";
 import VictimList from "./pages/secrateria/VictimList"; // adjust path accordingly
+import AdminReportsPage from "./pages/admin/AdminReportsPage";
+
+import ReportDetailsPage from "./pages/admin/ReportDetailsPage";
+
+import { ErrorBoundary } from "./components/ErrorBoundary";
+
+import IncidentReportForm from "./pages/user/IncidentReportForm";
+
 
 import SecretariaManageCases from "./pages/secrateria/SecretariaManageCases";
 import CaseDetailPage from "./pages/secrateria/CaseDetailPage";
@@ -21,6 +29,7 @@ import AdminNewVictimForm from "./pages/admin/Admin_NewVictimForm";
 import AdminVictimList from "./pages/admin/Admin_VictimList";
 import Adminmanageuser from "./pages/admin/Admin_manageuser";
 
+
 import Stats from "./pages/user/Stats"
 
 
@@ -28,6 +37,8 @@ function App() {
   const { user } = useAuth();
 
   console.log("App user context:", user);
+
+  
 
   // Utility function to determine default dashboard based on role
   const getDefaultDashboard = () => {
@@ -55,6 +66,9 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
 
+
+      
+
      
       {/* Victims Management */}
       <Route path="/secretaria/victims/list" element={<VictimList />} />
@@ -73,6 +87,20 @@ function App() {
       {/* Victims Management admin */}
       <Route path="/admin/victims/list" element={<AdminVictimList />} />
       <Route path="/admin/victims/new" element={<AdminNewVictimForm />} />
+      <Route path="/admin/AdminReportsPage" element={<AdminReportsPage />} />
+
+      <Route path="/admin/reports/:id" element={<ReportDetailsPage />} />
+      <Route 
+        path="/incidentReportForm" 
+        element={
+          <ErrorBoundary>
+
+            <IncidentReportForm />
+
+          </ErrorBoundary>
+
+        } 
+        />
 
 
 
