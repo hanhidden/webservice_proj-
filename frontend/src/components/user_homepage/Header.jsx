@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaChartBar, FaSignOutAlt } from "react-icons/fa";
 import { LawIcon } from "@primer/octicons-react";
-import { IoDocumentText } from "react-icons/io5";
+import { IoDocumentText, IoHomeOutline } from "react-icons/io5";
 import { useAuth } from "../../auth";
 
 export default function Header({ scrollToReport, onLogin, onLogout }) {
@@ -42,6 +42,13 @@ export default function Header({ scrollToReport, onLogin, onLogout }) {
             >
               Login/Sign Up
             </Link> */}
+
+            <button
+              onClick={logout}
+              className="flex items-center hover:text-yellow-600 whitespace-nowrap"
+            >
+              <FaSignOutAlt className="mr-1" /> Logout
+            </button>
           </>
         ) : (
           <Link
@@ -51,6 +58,13 @@ export default function Header({ scrollToReport, onLogin, onLogout }) {
             Login/Sign Up
           </Link>
         )}
+
+        <Link
+          to="/dashboard/user"
+          className="flex items-center hover:text-yellow-600 whitespace-nowrap"
+        >
+          <IoHomeOutline className="mr-1" /> Home
+        </Link>
 
         <Link
           to="/stats"
@@ -64,13 +78,6 @@ export default function Header({ scrollToReport, onLogin, onLogout }) {
           className="flex items-center hover:text-yellow-600 whitespace-nowrap"
         >
           <IoDocumentText className="mr-1" /> Report an Incident
-        </button>
-
-        <button
-          onClick={logout}
-          className="flex items-center hover:text-yellow-600 whitespace-nowrap"
-        >
-          <FaSignOutAlt className="mr-1" /> Logout
         </button>
       </nav>
     </header>

@@ -71,7 +71,6 @@ import { CiCircleCheck } from "react-icons/ci";
 //   );
 // };
 
-
 const UserCard = ({ user, onReject }) => {
   const { user: loggedInUser } = useAuth(); // Get logged-in user
 
@@ -119,9 +118,12 @@ const UserCard = ({ user, onReject }) => {
         </div>
 
         <div className="flex flex-col space-y-2 ml-4">
-          {user.is_approved && (
-            isCurrentUser ? (
-              <span className="text-sm text-gray-500 italic mt-1 bg-amber-300 px-3 py-1 rounded- font-medium border "> your account</span>
+          {user.is_approved &&
+            (isCurrentUser ? (
+              <span className="text-sm text-gray-500 italic mt-1 bg-amber-300 px-3 py-1 rounded- font-medium border ">
+                {" "}
+                your account
+              </span>
             ) : (
               <button
                 onClick={() => {
@@ -137,8 +139,7 @@ const UserCard = ({ user, onReject }) => {
               >
                 <Ban className="w-4 h-4" />
               </button>
-            )
-          )}
+            ))}
         </div>
       </div>
     </div>

@@ -38,8 +38,14 @@ class CreateVictimSchema(BaseModel):
     risk_assessment: RiskAssessmentSchema
     support_services: Optional[List[SupportServiceSchema]] = []
 
+# class VictimOutSchema(CreateVictimSchema):
+#     id: str
+#     created_at: str
+#     updated_at: str
+
 class VictimOutSchema(CreateVictimSchema):
     id: str
+    victimId: str  # <-- new field
     created_at: str
     updated_at: str
 
