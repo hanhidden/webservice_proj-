@@ -2,13 +2,12 @@
 from fastapi import APIRouter, HTTPException,Depends,Body
 from datetime import datetime
 from bson import ObjectId
-
 from app.schemas.victim_schemas import CreateVictimSchema, VictimOutSchema, VictimPatchSchema
 from app.core.database import db
 from app.core.database import get_database
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi.responses import JSONResponse
-
+from app.utils.id_generator import get_next_custom_id
 
 from typing import List, Dict
 
@@ -17,15 +16,16 @@ router = APIRouter()
 
 @router.get("/all", response_model=List[Dict])
 async def list_victims(db: AsyncIOMotorDatabase = Depends(get_database)):
-    cursor = db.victims.find({}, {"_id": 1, "type": 1})
+    # Add "victimId" to projection
+    cursor = db.victims.find({}, {"_id": 1, "type": 1, "victimId": 1})
     victims = []
     async for doc in cursor:
         victims.append({
             "id": str(doc["_id"]),
-            "type": doc.get("type", "unknown")
+            "type": doc.get("type", "unknown"),
+            "victimId": doc.get("victimId", None)
         })
     return JSONResponse(content=victims)
-
 
 @router.post("/", response_model=VictimOutSchema)
 async def create_victim(victim: CreateVictimSchema, db: AsyncIOMotorDatabase = Depends(get_database)):
@@ -33,6 +33,11 @@ async def create_victim(victim: CreateVictimSchema, db: AsyncIOMotorDatabase = D
     now = datetime.utcnow()
     data["created_at"] = now
     data["updated_at"] = now
+    custom_victim_id = await get_next_custom_id(db, victim.type)
+    data["victimId"] =   custom_victim_id
+
+   
+
 
     # Insert victim
     result = await db.victims.insert_one(data)
@@ -57,12 +62,20 @@ async def create_victim(victim: CreateVictimSchema, db: AsyncIOMotorDatabase = D
             {"$addToSet": {"victims": victim_id}}  # push ObjectId directly
         )
 
+    # return VictimOutSchema(
+    #     id=str(victim_id),
+    #     **victim.dict(),
+    #     created_at=str(now),
+    #     updated_at=str(now)
+    # )
     return VictimOutSchema(
-        id=str(victim_id),
-        **victim.dict(),
-        created_at=str(now),
-        updated_at=str(now)
+    id=str(victim_id),
+    victimId=custom_victim_id,
+    **victim.dict(),
+    created_at=str(now),
+    updated_at=str(now)
     )
+
 
 
 @router.get("/{victim_id}", response_model=VictimOutSchema)
@@ -187,7 +200,7 @@ async def get_risk_history(victim_id: str, db: AsyncIOMotorDatabase = Depends(ge
 
 
 
-@router.get("/case/{case_id}", response_model=list[VictimOutSchema])
+@router.get("/case/{case_id}", response_model=List[VictimOutSchema])
 async def get_victims_by_case(case_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
     cursor = db.victims.find({"cases_involved": case_id})
     victims = []

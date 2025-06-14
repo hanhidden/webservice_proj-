@@ -21,6 +21,7 @@ import AdminNewVictimForm from "./pages/admin/Admin_NewVictimForm";
 import AdminVictimList from "./pages/admin/Admin_VictimList";
 import Adminmanageuser from "./pages/admin/Admin_manageuser";
 
+import Stats from "./pages/user/Stats";
 
 function App() {
   const { user } = useAuth();
@@ -47,10 +48,14 @@ function App() {
     <Routes>
       {/* Default route depends on user role */}
       <Route path="/" element={getDefaultDashboard()} />
+
+      <Route path="/dashboard/user" element={<UserDashboard />} />
+
+      <Route path="/stats" element={<Stats />} />
+
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
 
-     
       {/* Victims Management */}
       <Route path="/secretaria/victims/list" element={<VictimList />} />
       <Route path="/secretaria/victims/new" element={<VictimForm />} />
@@ -68,9 +73,6 @@ function App() {
       {/* Victims Management admin */}
       <Route path="/admin/victims/list" element={<AdminVictimList />} />
       <Route path="/admin/victims/new" element={<AdminNewVictimForm />} />
-
-
-
 
       {/* Victims Management secretaria */}
       <Route path="/secretaria/victims/list" element={<VictimList />} />

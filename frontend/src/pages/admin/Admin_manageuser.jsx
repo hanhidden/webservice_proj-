@@ -1,10 +1,79 @@
-
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/user_homepage/Sidebar";
 import Header from "../../components/All/header";
 import { useAuth } from "../../auth";
+import { Ban } from "lucide-react";
+import { CiCircleCheck } from "react-icons/ci";
 
-const UserCard = ({ user }) => {
+// const UserCard = ({ user, onReject }) => {
+//   const getRoleColor = (role) => {
+//     switch (role) {
+//       case "admin":
+//         return "bg-red-50 text-red-900 border-red-200";
+//       case "organization":
+//         return "bg-navy-50 text-navy-900 border-navy-200";
+//       case "secretaria":
+//         return "bg-emerald-50 text-emerald-900 border-emerald-200";
+//       case "user":
+//         return "bg-stone-100 text-stone-800 border-stone-300";
+//       default:
+//         return "bg-stone-100 text-stone-800 border-stone-300";
+//     }
+//   };
+
+//   return (
+//     <div className="bg-cream-50 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-beige-200">
+//       <div className="flex items-start justify-between">
+//         <div className="flex-1">
+//           <h3 className="text-lg font-semibold text-navy-900">{user.name}</h3>
+//           <p className="text-stone-600 mt-1">{user.email}</p>
+//           <div className="flex items-center mt-3 space-x-3">
+//             <span
+//               className={`px-3 py-1 rounded-full text-sm font-medium border ${getRoleColor(
+//                 user.role
+//               )}`}
+//             >
+//               {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+//             </span>
+//             <span
+//               className={`px-3 py-1 rounded-full text-sm font-medium border ${
+//                 user.is_approved
+//                   ? "bg-green-50 text-green-900 border-green-200"
+//                   : "bg-amber-50 text-amber-900 border-amber-200"
+//               }`}
+//             >
+//               {user.is_approved ? "Approved" : "Pending"}
+//             </span>
+//           </div>
+//         </div>
+//         <div className="flex flex-col space-y-2 ml-4">
+//           {user.is_approved && user && (
+//             <div className="ml-4">
+//               <button
+//                 onClick={() => {
+//                   const confirmed = window.confirm(
+//                     "Are you sure you want to deactivate this account?"
+//                   );
+//                   if (confirmed) {
+//                     onReject(user.id);
+//                   }
+//                 }}
+//                 className="p-2 bg-[#fc2b2b9f] text-white rounded-full hover:bg-red-800 transition-colors shadow-sm"
+//                 title="Deactivate Account"
+//               >
+//                 <Ban className="w-4 h-4" />
+//               </button>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+const UserCard = ({ user, onReject }) => {
+  const { user: loggedInUser } = useAuth(); // Get logged-in user
+
   const getRoleColor = (role) => {
     switch (role) {
       case "admin":
@@ -19,6 +88,8 @@ const UserCard = ({ user }) => {
         return "bg-stone-100 text-stone-800 border-stone-300";
     }
   };
+
+  const isCurrentUser = loggedInUser?.email === user.email;
 
   return (
     <div className="bg-cream-50 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-beige-200">
@@ -45,12 +116,37 @@ const UserCard = ({ user }) => {
             </span>
           </div>
         </div>
+
+        <div className="flex flex-col space-y-2 ml-4">
+          {user.is_approved &&
+            (isCurrentUser ? (
+              <span className="text-sm text-gray-500 italic mt-1 bg-amber-300 px-3 py-1 rounded- font-medium border ">
+                {" "}
+                your account
+              </span>
+            ) : (
+              <button
+                onClick={() => {
+                  const confirmed = window.confirm(
+                    "Are you sure you want to deactivate this account?"
+                  );
+                  if (confirmed) {
+                    onReject(user.id);
+                  }
+                }}
+                className="p-2 bg-[#fc2b2b9f] text-white rounded-full hover:bg-red-800 transition-colors shadow-sm"
+                title="Deactivate Account"
+              >
+                <Ban className="w-4 h-4" />
+              </button>
+            ))}
+        </div>
       </div>
     </div>
   );
 };
 
-const UsersList = ({ users, loading }) => {
+const UsersList = ({ users, loading, onReject }) => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -71,13 +167,13 @@ const UsersList = ({ users, loading }) => {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {users.map((user) => (
-        <UserCard key={user.id} user={user} />
+        <UserCard key={user.id} user={user} onReject={onReject} />
       ))}
     </div>
   );
 };
 
-const ApprovalRequests = ({ users, loading }) => {
+const ApprovalRequests = ({ users, loading, onApprove }) => {
   const pendingUsers = users.filter((user) => !user.is_approved);
 
   if (loading) {
@@ -117,11 +213,12 @@ const ApprovalRequests = ({ users, loading }) => {
               </span>
             </div>
             <div className="flex space-x-3">
-              <button className="px-6 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 transition-colors shadow-sm">
+              <button
+                onClick={() => onApprove(user.id)}
+                className="px-6 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-800 transition-colors shadow-sm"
+              >
+                <CiCircleCheck size={30} />
                 Approve
-              </button>
-              <button className="px-6 py-2 bg-red-700 text-white rounded-md hover:bg-red-800 transition-colors shadow-sm">
-                Reject
               </button>
             </div>
           </div>
@@ -154,6 +251,28 @@ function Admin_manageuser() {
       console.error("Error fetching users:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApprove = async (userId) => {
+    try {
+      await fetch(`http://127.0.0.1:8000/api/users/approve/${userId}`, {
+        method: "PUT",
+      });
+      fetchUsers(); // Refresh user list
+    } catch (error) {
+      console.error("Error approving user:", error);
+    }
+  };
+
+  const handleReject = async (userId) => {
+    try {
+      await fetch(`http://127.0.0.1:8000/api/users/reject/${userId}`, {
+        method: "PUT",
+      });
+      fetchUsers(); // Refresh user list
+    } catch (error) {
+      console.error("Error rejecting user:", error);
     }
   };
 
@@ -203,16 +322,16 @@ function Admin_manageuser() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                       activeTab === tab.id
-                        ? " border-navy-700 text-navy-900"
-                        : "border-transparent text-stone-600 hover:text-navy-700 hover:border-stone-400"
+                        ? " border-stone-800 text-navy-900 "
+                        : " text-stone-600 hover:text-navy-700 hover:border-sky-600"
                     }`}
                   >
                     {tab.label}
                     <span
                       className={`ml-2 px-2 py-1 rounded-full text-xs ${
                         activeTab === tab.id
-                          ? "bg-navy-100 text-navy-900"
-                          : "bg-stone-200 text-stone-700"
+                          ? "bg-navy-200 text-navy-900"
+                          : "bg-stone-100 text-stone-700"
                       }`}
                     >
                       {tab.count}
@@ -287,7 +406,11 @@ function Admin_manageuser() {
                       Refresh
                     </button>
                   </div>
-                  <UsersList users={filteredUsers} loading={loading} />
+                  <UsersList
+                    users={filteredUsers}
+                    loading={loading}
+                    onReject={handleReject}
+                  />
                 </>
               )}
 
@@ -300,12 +423,18 @@ function Admin_manageuser() {
                     </h2>
                     <button
                       onClick={fetchUsers}
-                      className="px-4 py-2 bg-navy-700 text-white rounded-md hover:bg-navy-800 transition-colors shadow-sm"
+                      className="px-4 py-2 bg-[#2a4c80]  text-white rounded-md hover:bg-[#2a4c80b7] transition-colors shadow-sm"
                     >
                       Refresh
                     </button>
                   </div>
-                  <ApprovalRequests users={users} loading={loading} />
+                  {/* <ApprovalRequests users={users} loading={loading} /> */}
+                  <ApprovalRequests
+                    users={filteredUsers}
+                    loading={loading}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                  />
                 </>
               )}
             </div>

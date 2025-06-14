@@ -1,6 +1,7 @@
 # app/api/routes/users.py
 from fastapi import APIRouter, HTTPException
-from app.schemas.user_crud import get_all_users
+
+from app.schemas.user_crud import get_all_users, update_user_approval
 from app.models.user import UserResponse, UsersListResponse
 from typing import List
 
@@ -8,10 +9,7 @@ router = APIRouter()
 
 @router.get("/all", response_model=UsersListResponse)
 async def get_all_users_endpoint():
-    """
-    Get all users in the system
-    Returns user information without sensitive data like passwords
-    """
+   
     try:
         users_data = await get_all_users()
         
@@ -34,3 +32,37 @@ async def get_all_users_endpoint():
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching users: {str(e)}")
+    
+
+    
+
+# ✅ Approve user
+
+@router.put("/approve/{user_id}")
+
+async def approve_user(user_id: str):
+
+    updated = await update_user_approval(user_id, True)
+
+    if updated == 0:
+
+        raise HTTPException(status_code=404, detail="User not found or already approved.")
+
+    return {"message": "User approved successfully."}
+
+
+
+# ❌ Reject user
+
+@router.put("/reject/{user_id}")
+
+async def reject_user(user_id: str):
+
+    updated = await update_user_approval(user_id, False)
+
+    if updated == 0:
+
+        raise HTTPException(status_code=404, detail="User not found or already rejected.")
+
+    return {"message": "User rejected successfully."}
+
