@@ -31,6 +31,7 @@ import Adminmanageuser from "./pages/admin/Admin_manageuser";
 
 
 import Stats from "./pages/user/Stats"
+import OrganizationIncidentReportForm from "./pages/organization/OrganizationIncidentReportForm";
 
 
 function App() {
@@ -118,21 +119,12 @@ function App() {
         element={<RiskHistory />}
       />
 
-      {/* Role-based dashboard route (explicit) */}
-      <Route
-        path="/dashboard/:role"
-        element={
-          user ? (
-            user.is_approved ? (
-              getDefaultDashboard()
-            ) : (
-              <Navigate to="/login" />
-            )
-          ) : (
-            <Navigate to="/login" />
-          )
-        }
-      />
+      <Route path="/organization/dashboard" element={<OrganizationDashboard />} />
+      <Route path="/organization/reports" element={<OrganizationIncidentReportForm />} />
+
+
+
+
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
