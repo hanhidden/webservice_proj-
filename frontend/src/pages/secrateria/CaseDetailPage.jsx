@@ -4,6 +4,7 @@ import axios from "axios";
 import Sidebar from "../../components/user_homepage/Sidebar";
 import Header from "../../components/All/header";
 import { useAuth } from "../../auth";
+import { ArrowLeft } from "lucide-react";
 
 const violationTypes = [
   "arbitrary_detention",
@@ -184,7 +185,16 @@ export default function CaseDetailPage() {
           <h1 className="text-2xl font-bold mb-4">
             Case: {caseData.case_id || caseData._id}
           </h1>
-
+          {/* Back Button */}
+          <div className="mb-4">
+            <button
+              onClick={() => window.history.back()}
+              className="inline-flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Cases </span>
+            </button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-xl shadow border border-[#F9CC5B]">
             <div>
               <label className="font-semibold">Title</label>

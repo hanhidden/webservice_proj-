@@ -390,37 +390,103 @@ async def get_report_by_id(
 
 
 
+# old
+# @router.patch("/reports/{report_id}")
+# async def update_report_status(
+#     report_id: str = Path(...),
+#     status: str = Query(...),
+#     db: AsyncIOMotorDatabase = Depends(get_database)
+# ):
+#     valid_statuses = ["new", "pending", "turned-into-case"]
+#     if status not in valid_statuses:
+#         raise HTTPException(status_code=400, detail=f"Invalid status: {status}")
+
+#     # Try to update using _id
+#     try:
+#         object_id = ObjectId(report_id)
+#     except Exception:
+#         raise HTTPException(status_code=400, detail="Invalid report ID format")
+
+#     result = await db.incident_reports.update_one(
+#         {"_id": object_id},
+#         {"$set": {"status": status, "updated_at": datetime.utcnow()}}
+#     )
+
+#     if result.matched_count == 0:
+#         raise HTTPException(status_code=404, detail="Report not found")
+
+#     updated = await db.incident_reports.find_one({"_id": object_id})
+#     if updated:
+#         return serialize_document(updated)
+
+#     raise HTTPException(status_code=500, detail="Unexpected error updating report")
+
+
+# @router.patch("/reports/{report_id}")
+# async def update_report_status(
+#     report_id: str = Path(...),
+#     status: str = Query(...),
+#     db: AsyncIOMotorDatabase = Depends(get_database)
+# ):
+#     valid_statuses = ["new", "pending", "turned-into-case","assigned"]
+#     if status not in valid_statuses:
+#         raise HTTPException(status_code=400, detail=f"Invalid status: {status}")
+
+#     result = await db.incident_reports.update_one(
+#         {"report_id": report_id},  # Use report_id field, NOT _id
+#         {"$set": {"status": status, "updated_at": datetime.utcnow()}}
+#     )
+
+#     if result.matched_count == 0:
+#         raise HTTPException(status_code=404, detail="Report not found")
+
+#     updated = await db.incident_reports.find_one({"report_id": report_id})
+#     if updated:
+#         return serialize_document(updated)
+
+#     raise HTTPException(status_code=500, detail="Unexpected error updating report")
+
+
 
 @router.patch("/reports/{report_id}")
 async def update_report_status(
     report_id: str = Path(...),
     status: str = Query(...),
+    secretaria_id: str = Query(None),  # optional, but required if status is 'assigned'
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    valid_statuses = ["new", "pending", "turned-into-case"]
+    valid_statuses = ["new", "pending", "turned-into-case", "assigned"]
+
     if status not in valid_statuses:
         raise HTTPException(status_code=400, detail=f"Invalid status: {status}")
 
-    # Try to update using _id
-    try:
-        object_id = ObjectId(report_id)
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid report ID format")
+    update_fields = {
+        "status": status,
+        "updated_at": datetime.utcnow()
+    }
+
+    # If assigning, require secretaria_id
+    if status == "assigned":
+        if not secretaria_id:
+            raise HTTPException(status_code=400, detail="secretaria_id is required when status is 'assigned'")
+        try:
+            update_fields["assigned_secretaria"] = ObjectId(secretaria_id)
+        except:
+            raise HTTPException(status_code=400, detail="Invalid secretaria_id")
 
     result = await db.incident_reports.update_one(
-        {"_id": object_id},
-        {"$set": {"status": status, "updated_at": datetime.utcnow()}}
+        {"report_id": report_id},
+        {"$set": update_fields}
     )
 
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Report not found")
 
-    updated = await db.incident_reports.find_one({"_id": object_id})
+    updated = await db.incident_reports.find_one({"report_id": report_id})
     if updated:
         return serialize_document(updated)
 
     raise HTTPException(status_code=500, detail="Unexpected error updating report")
-
 # Add endpoint to get reports by organization
 @router.get("/organization/{org_id}", response_model=List[IncidentReportOutSchema])
 async def get_reports_by_organization(
@@ -465,12 +531,6 @@ async def count_locations(org_id: str, db: AsyncIOMotorDatabase = Depends(get_da
     ]
     result = await db.incident_reports.aggregate(pipeline).to_list(length=None)
     return [{"name": item["_id"], "count": item["count"]} for item in result]
-
-
-
-
-
-
 
 
 
