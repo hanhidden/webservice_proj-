@@ -17,8 +17,11 @@ import {
   IoHeartOutline,
   IoCheckmarkCircleOutline,
   IoCloseCircleOutline,
+  IoBriefcaseOutline,
 } from "react-icons/io5";
 import Loader from "../../components/All/Loader";
+
+import { LuFileLock2 } from "react-icons/lu";
 
 export default function Admin_VictimList() {
   const { user } = useAuth();
@@ -158,9 +161,9 @@ export default function Admin_VictimList() {
   const getBooleanIcon = (value) => {
     if (typeof value === "boolean") {
       return value ? (
-        <IoCheckmarkCircleOutline className="text-emerald-600" size={18} />
+        <IoCheckmarkCircleOutline className="text-emerald-600" size={20} />
       ) : (
-        <IoCloseCircleOutline className="text-red-500" size={18} />
+        <IoCloseCircleOutline className="text-red-500" size={20} />
       );
     }
     return null;
@@ -168,13 +171,15 @@ export default function Admin_VictimList() {
 
   const getIconForField = (key) => {
     const iconMap = {
-      email: <IoMailOutline className="text-slate-600" />,
-      phone: <IoCallOutline className="text-slate-600" />,
-      address: <IoLocationOutline className="text-slate-600" />,
-      created_at: <IoCalendarOutline className="text-slate-600" />,
-      updated_at: <IoTimeOutline className="text-slate-600" />,
+      email: <IoMailOutline className="text-slate-600" size={20} />,
+      phone: <IoCallOutline className="text-slate-600" size={20} />,
+      address: <IoLocationOutline className="text-slate-600" size={20} />,
+      created_at: <IoCalendarOutline className="text-slate-600" size={20} />,
+      updated_at: <IoTimeOutline className="text-slate-600" size={20} />,
     };
-    return iconMap[key] || <IoPersonOutline className="text-slate-600" />;
+    return (
+      iconMap[key] || <IoPersonOutline className="text-slate-600  " size={20} />
+    );
   };
 
   const renderSpecialSection = (key, value, icon, bgColor, borderColor) => {
@@ -311,7 +316,7 @@ export default function Admin_VictimList() {
           ) : (
             <div className="flex flex-col">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredPeople.map(({ id, type, demographics }) => (
+                {filteredPeople.map(({ id, type, victimId }) => (
                   <div
                     key={id}
                     className="cursor-pointer bg-white border border-bg-gray-100 rounded-lg p-4 shadow hover:shadow-lg flex items-center space-x-3 transition-all duration-200 hover:scale-105"
@@ -319,14 +324,11 @@ export default function Admin_VictimList() {
                   >
                     <IoPersonOutline size={40} className="text-slate-600" />
                     <div>
-                      <p className="font-semibold truncate text-slate-800">
-                        {demographics?.first_name} {demographics?.last_name}
-                      </p>
                       <p className="text-sm text-slate-600 capitalize">
                         {type}
                       </p>
-                      <p className="text-xs text-slate-500 truncate">
-                        ID: {id.slice(0, 8)}...
+                      <p className="text-sm text-slate-600 capitalize">
+                        {victimId?.$oid || victimId}
                       </p>
                     </div>
                   </div>
@@ -346,6 +348,7 @@ export default function Admin_VictimList() {
                         <AiOutlineClose size={20} />
                       </button>
 
+                    
                       {!loading && selectedPerson && (
                         <div className="flex items-center space-x-4">
                           <div className="bg-stone-200 rounded-full p-3">
@@ -354,15 +357,27 @@ export default function Admin_VictimList() {
                               className="text-slate-800"
                             />
                           </div>
-                          <div>
-                            <h2 className="text-2xl font-bold">
-                              {selectedPerson.demographics?.first_name}{" "}
-                              {selectedPerson.demographics?.last_name}
-                            </h2>
-                            <p className="text-stone-300 capitalize text-lg">
-                              {selectedPerson.type}
-                            </p>
-                          </div>
+
+                          {!selectedPerson.anonymous ? (
+                            <div>
+                              <h2 className="text-2xl font-bold">
+                                {selectedPerson.demographics?.first_name}{" "}
+                                {selectedPerson.demographics?.last_name}
+                              </h2>
+                              <p className="text-stone-300 capitalize text-lg">
+                                {selectedPerson.type}
+                              </p>
+                            </div>
+                          ) : (
+                            <div>
+                              <h2 className="text-2xl font-bold">
+                                Victim ID: {selectedPerson.victimId || "N/A"}
+                              </h2>
+                              <p className="text-yellow-700 text-lg mt-1 italic">
+                                This person has chosen to remain anonymous.
+                              </p>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -408,6 +423,12 @@ export default function Admin_VictimList() {
                                 value={selectedPerson.id}
                               />
                               <DetailRow
+                                icon={getIconForField("id")}
+                                label="Victim ID"
+                                value={selectedPerson.victimId || "n/a"}
+                              />
+
+                              <DetailRow
                                 icon={getIconForField("type")}
                                 label="Type"
                                 value={selectedPerson.type}
@@ -425,57 +446,131 @@ export default function Admin_VictimList() {
                             </div>
                           </div>
 
-                          {/* Demographics Card */}
-                          {selectedPerson.demographics && (
-                            <div className=" bg-[#e5dfd3b0] rounded-xl p-6 border border-amber-200">
-                              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-                                <IoPersonOutline className="mr-2 text-amber-700" />
-                                Demographics
+                          {["victim", "witness"].includes(
+                            selectedPerson.type
+                          ) && selectedPerson.anonymous ? (
+                            <div className="bg-yellow-100 text-yellow-900 rounded-xl p-6 border border-yellow-400 text-center">
+                              <p className="mb-2 font-semibold">
+                                This individual has chosen to remain anonymous.
+                              </p>
+                              <p>
+                                For any necessary inquiries, please contact the
+                                Secretira or the assigned legal
+                                representative.
+                              </p>
+                            </div>
+                          ) : (
+                            <>
+                              {/* Demographics Card */}
+                              {selectedPerson.demographics && (
+                                <div className="bg-[#e5dfd3b0] rounded-xl p-6 border border-amber-200">
+                                  <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+                                    <IoPersonOutline className="mr-2 text-amber-700" />
+                                    Demographics
+                                  </h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {Object.entries(
+                                      selectedPerson.demographics
+                                    ).map(([key, val]) => (
+                                      <DetailRow
+                                        key={key}
+                                        icon={
+                                          getBooleanIcon(val) ||
+                                          getIconForField(key)
+                                        }
+                                        label={key.replace(/_/g, " ")}
+                                        value={formatValue(val)}
+                                        isBooleanValue={
+                                          typeof val === "boolean"
+                                        }
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Contact Information Card */}
+                              {selectedPerson.contact_info && (
+                                <div className="bg-[#e5dfd3b0] rounded-xl p-6 border border-blue-200">
+                                  <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+                                    <IoMailOutline className="mr-2 text-blue-700" />
+                                    Contact Information
+                                  </h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {Object.entries(
+                                      selectedPerson.contact_info
+                                    ).map(([key, val]) => (
+                                      <DetailRow
+                                        key={key}
+                                        icon={
+                                          getBooleanIcon(val) ||
+                                          getIconForField(key)
+                                        }
+                                        label={key.replace(/_/g, " ")}
+                                        value={formatValue(val)}
+                                        isBooleanValue={
+                                          typeof val === "boolean"
+                                        }
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          )}
+                          {/* Anonymous Section */}
+                          {selectedPerson?.anonymous !== undefined && (
+                            <div className="bg-[#e5dfd3b0] rounded-xl p-6 border border-slate-200">
+                              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center capitalize">
+                                <IoShieldOutline
+                                  className="mr-2 text-slate-600"
+                                  size={20}
+                                />
+                                Anonymous
                               </h3>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {Object.entries(
-                                  selectedPerson.demographics
-                                ).map(([key, val]) => (
-                                  <DetailRow
-                                    key={key}
-                                    icon={
-                                      getBooleanIcon(val) ||
-                                      getIconForField(key)
-                                    }
-                                    label={key.replace(/_/g, " ")}
-                                    value={formatValue(val)}
-                                    isBooleanValue={typeof val === "boolean"}
-                                  />
-                                ))}
+
+                              <div className="bg-white rounded-lg p-4 border border-stone-200">
+                                <div className="flex items-center space-x-2">
+                                  {getBooleanIcon(selectedPerson.anonymous)}
+                                  <span className="text-slate-700">
+                                    {formatValue(selectedPerson.anonymous)}
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           )}
 
-                          {/* Contact Information Card */}
-                          {selectedPerson.contact_info && (
-                            <div className="bg-[#e5dfd3b0] rounded-xl p-6 border border-blue-200">
-                              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-                                <IoMailOutline className="mr-2 text-blue-700" />
-                                Contact Information
-                              </h3>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {Object.entries(
-                                  selectedPerson.contact_info
-                                ).map(([key, val]) => (
-                                  <DetailRow
-                                    key={key}
-                                    icon={
-                                      getBooleanIcon(val) ||
-                                      getIconForField(key)
-                                    }
-                                    label={key.replace(/_/g, " ")}
-                                    value={formatValue(val)}
-                                    isBooleanValue={typeof val === "boolean"}
+                          {/* Cases Involved Section */}
+                          {selectedPerson?.cases_involved &&
+                            selectedPerson.cases_involved.length > 0 && (
+                              <div className="bg-[#e5dfd3b0] rounded-xl p-6 border border-slate-200">
+                                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center capitalize">
+                                  <IoBriefcaseOutline
+                                    className="mr-2 text-slate-600"
+                                    size={20}
                                   />
-                                ))}
+                                  Cases Involved
+                                </h3>
+
+                                {selectedPerson.cases_involved.map(
+                                  (caseId, idx) => (
+                                    <div
+                                      className="bg-white rounded-lg p-4 mb-2 border border-stone-200"
+                                      key={idx}
+                                    >
+                                      <div className="flex items-center space-x-2">
+                                        {" "}
+                                        <LuFileLock2
+                                          className="mr-2 text-slate-600"
+                                          size={20}
+                                        />{" "}
+                                        {formatValue(caseId)}
+                                      </div>
+                                    </div>
+                                  )
+                                )}
                               </div>
-                            </div>
-                          )}
+                            )}
 
                           {/* Risk Assessment Card */}
                           {selectedPerson.risk_assessment &&
@@ -486,7 +581,6 @@ export default function Admin_VictimList() {
                               "bg-[#e5dfd3b0]",
                               "border-red-200"
                             )}
-
 
                           {selectedPerson.support_services &&
                             Array.isArray(selectedPerson.support_services) && (
@@ -502,7 +596,9 @@ export default function Admin_VictimList() {
                                         key={index}
                                         className="bg-white rounded-lg p-4 border border-stone-200"
                                       >
-                                        <h4 className="text-md font-semibold text-slate-700 mb-2">Service {index + 1}</h4>
+                                        <h4 className="text-md font-semibold text-slate-700 mb-2">
+                                          Service {index + 1}
+                                        </h4>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                           {Object.entries(service).map(
@@ -528,59 +624,6 @@ export default function Admin_VictimList() {
                                 </div>
                               </div>
                             )}
-
-                          {/* Additional Information */}
-                          {Object.entries(selectedPerson)
-                            .filter(
-                              ([key]) =>
-                                ![
-                                  "id",
-                                  "type",
-                                  "created_at",
-                                  "updated_at",
-                                  "demographics",
-                                  "contact_info",
-                                  "risk_assessment",
-                                  "support_services",
-                                ].includes(key)
-                            )
-                            .map(([key, value]) => (
-                              <div
-                                key={key}
-                                className="bg-[#e5dfd3b0] rounded-xl p-6 border border-slate-200"
-                              >
-                                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center capitalize">
-                                  <IoPersonOutline className="mr-2 text-slate-600" />
-                                  {key.replace(/_/g, " ")}
-                                </h3>
-                                {typeof value === "object" ? (
-                                  <div className="space-y-3">
-                                    {Object.entries(value).map(
-                                      ([subKey, subValue]) => (
-                                        <DetailRow
-                                          key={subKey}
-                                          icon={
-                                            getBooleanIcon(subValue) ||
-                                            getIconForField(subKey)
-                                          }
-                                          label={subKey.replace(/_/g, " ")}
-                                          value={formatValue(subValue)}
-                                          isBooleanValue={
-                                            typeof subValue === "boolean"
-                                          }
-                                        />
-                                      )
-                                    )}
-                                  </div>
-                                ) : (
-                                  <div className="bg-white rounded-lg p-4 border border-stone-200">
-                                    <p className="text-slate-700">
-                                      {formatValue(value)}
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
                         </div>
                       )}
 
@@ -605,10 +648,6 @@ export default function Admin_VictimList() {
                   </div>
                 </div>
               )}
-
-
-
-              
             </div>
           )}
         </main>
@@ -617,7 +656,6 @@ export default function Admin_VictimList() {
   );
 }
 
-// Enhanced DetailRow Component with boolean handling and better styling
 const DetailRow = ({ icon, label, value, isBooleanValue }) => (
   <div className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-stone-150 hover:shadow-sm transition-shadow duration-200">
     <div className="flex-shrink-0">{icon}</div>

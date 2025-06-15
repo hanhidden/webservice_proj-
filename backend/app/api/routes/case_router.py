@@ -35,10 +35,7 @@ def serialize_case_document(case_doc):
         return case_doc
     return serialize_value(case_doc)
 
-# ADD OPTIONS HANDLER FOR PREFLIGHT REQUESTS
-# @router.options("/")
-# async def options_create_case():
-#     return JSONResponse(content={}, status_code=200)
+
 
 # Add OPTIONS handler for the specific case ID endpoint
 @router.options("/{case_id}")
@@ -299,24 +296,6 @@ async def get_case(case_id: str, db: AsyncIOMotorDatabase = Depends(get_database
             raise HTTPException(status_code=400, detail="Invalid case ID format")
         print(f"Error fetching case: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch case")
-# Fix your update_status function:
-# @router.patch("/{case_id}")
-# async def update_status(
-#     case_id: str,
-#     new_status: str = Body(...),
-#     description: Optional[str] = Body(None),
-#     db: AsyncIOMotorDatabase = Depends(get_database)
-# ):
-#     case = await db.cases.find_one({"_id": ObjectId(case_id)})
-#     if not case:
-#         raise HTTPException(status_code=404, detail="Case not found")
-    
-#     # Use the same ID format for both find and update
-#     await db.cases.update_one(
-#     {"_id": ObjectId(case_id)},  # Changed from case_id to _id
-#         {"$set": {"status": new_status, "updated_at": datetime.utcnow()}}
-#     )
-#     return {"message": "Status updated"}
 
 #new
 @router.patch("/{case_id}")

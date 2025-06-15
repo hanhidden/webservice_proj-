@@ -2,13 +2,12 @@
 from fastapi import APIRouter, HTTPException,Depends,Body
 from datetime import datetime
 from bson import ObjectId
-
 from app.schemas.victim_schemas import CreateVictimSchema, VictimOutSchema, VictimPatchSchema
 from app.core.database import db
 from app.core.database import get_database
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi.responses import JSONResponse
-
+from app.utils.id_generator import get_next_custom_id
 
 
 from typing import List, Dict
@@ -18,6 +17,7 @@ router = APIRouter()
 
 @router.get("/all", response_model=List[Dict])
 async def list_victims(db: AsyncIOMotorDatabase = Depends(get_database)):
+
     cursor = db.victims.find({}, {
     "_id": 1,
     "victimId": 1,
@@ -26,6 +26,9 @@ async def list_victims(db: AsyncIOMotorDatabase = Depends(get_database)):
     "contact_info.name": 1,
     "anonymous": 1
 })
+
+   
+
     victims = []
     async for doc in cursor:
         # Try to get name from demographics first, then contact_info
@@ -39,13 +42,16 @@ async def list_victims(db: AsyncIOMotorDatabase = Depends(get_database)):
         victims.append({
             "id": str(doc["_id"]),
             "type": doc.get("type", "unknown"),
+
             "name": name,
-            "victimId": doc.get("victimId"),  # fixed here
+            #"victimId": doc.get("victimId"),  # fixed here
 
             "anonymous": doc.get("anonymous", False)
+
+            "victimId": doc.get("victimId", None)
+
         })
     return JSONResponse(content=victims)
-
 
 @router.post("/", response_model=VictimOutSchema)
 async def create_victim(victim: CreateVictimSchema, db: AsyncIOMotorDatabase = Depends(get_database)):
@@ -53,6 +59,11 @@ async def create_victim(victim: CreateVictimSchema, db: AsyncIOMotorDatabase = D
     now = datetime.utcnow()
     data["created_at"] = now
     data["updated_at"] = now
+    custom_victim_id = await get_next_custom_id(db, victim.type)
+    data["victimId"] =   custom_victim_id
+
+   
+
 
     # Insert victim
     result = await db.victims.insert_one(data)
@@ -77,12 +88,20 @@ async def create_victim(victim: CreateVictimSchema, db: AsyncIOMotorDatabase = D
             {"$addToSet": {"victims": victim_id}}  # push ObjectId directly
         )
 
+    # return VictimOutSchema(
+    #     id=str(victim_id),
+    #     **victim.dict(),
+    #     created_at=str(now),
+    #     updated_at=str(now)
+    # )
     return VictimOutSchema(
-        id=str(victim_id),
-        **victim.dict(),
-        created_at=str(now),
-        updated_at=str(now)
+    id=str(victim_id),
+    victimId=custom_victim_id,
+    **victim.dict(),
+    created_at=str(now),
+    updated_at=str(now)
     )
+
 
 
 @router.get("/{victim_id}", response_model=VictimOutSchema)

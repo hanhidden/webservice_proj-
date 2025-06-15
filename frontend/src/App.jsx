@@ -22,6 +22,9 @@ import AdminNewVictimForm from "./pages/admin/Admin_NewVictimForm";
 import AdminVictimList from "./pages/admin/Admin_VictimList";
 import Adminmanageuser from "./pages/admin/Admin_manageuser";
 
+import Stats from "./pages/user/Stats";
+
+
 function App() {
   const { user } = useAuth();
 
@@ -47,6 +50,11 @@ function App() {
     <Routes>
       {/* Default route depends on user role */}
       <Route path="/" element={getDefaultDashboard()} />
+
+      <Route path="/dashboard/user" element={<UserDashboard />} />
+
+      <Route path="/stats" element={<Stats />} />
+
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
 

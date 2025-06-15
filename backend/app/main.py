@@ -2,14 +2,18 @@
 # app/main.py
 from app.api.routes.auth import router as auth_router
 from app.api.routes.test_connection import router as test_connection_router
-from app.api.routes.users import router as users_router  # New import
+from app.api.routes.users import router as users_router 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.victims import router as victim_router
 from app.api.routes.case_router import router as case_router
+
 from app.api.routes.incident_report import router as incident_report
 from app.api.routes.evidence_route import router as evidence_router
 from app.api.routes.case_status_history import router as case_status_history_router
+from app.api.routes.report_router import router as report_router
+from app.api.routes.analytics_routes import router as analytics_router
+
 
 
 app = FastAPI()
@@ -50,4 +54,5 @@ app.include_router(incident_report, prefix="/api/incident_reports", tags=["Incid
 app.include_router(evidence_router, prefix="/api/evidence", tags=["Evidence"])
 app.include_router(case_status_history_router, prefix="/api/case_status_history", tags=["Case Status History"])
 
+app.include_router(analytics_router, prefix="/api/analytics", tags=["Analytics"])
 

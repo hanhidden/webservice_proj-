@@ -22,6 +22,7 @@ class RiskAssessment(BaseModel):
 
 class Victim(BaseModel):
     id: Optional[str] = Field(alias="_id")
+    victimId: str  # new
     type: str  # victim or witness
     anonymous: bool
     demographics: Optional[Demographics]
