@@ -1,13 +1,14 @@
+#cases model 
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from bson import ObjectId
 from datetime import datetime
-from .shared import PyObjectId  # Move your PyObjectId class into shared.py
+from .shared import PyObjectId
 
 class Evidence(BaseModel):
     type: str
     url: str
-    description: Optional[str]
+    description: Optional[str] = None
     date_captured: datetime
 
 class Perpetrator(BaseModel):
@@ -21,16 +22,22 @@ class Case(BaseModel):
     description: Optional[str] = None
     violation_types: List[str]
     status: str
-    priority: Optional[str]
+    priority: Optional[str] = None
     date_occurred: datetime
     date_reported: datetime
-    victims: List[PyObjectId]
-    perpetrators: List[Perpetrator]
-    evidence: List[Evidence]
-    list_of_reports_IDs: List[int]
+
+    victims: List[PyObjectId] = Field(default_factory=list)
+    perpetrators: List[Perpetrator] = Field(default_factory=list)
+    evidence: List[Evidence] = Field(default_factory=list)
+    list_of_reports_IDs: List[int] = Field(default_factory=list)
+    
     created_by: PyObjectId
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    assigned_secretaria: Optional[PyObjectId] = None
+    deleted: bool = False
+    witnesses: List[PyObjectId] = Field(default_factory=list)
 
     class Config:
         arbitrary_types_allowed = True
@@ -40,4 +47,16 @@ class Case(BaseModel):
 
 class CaseStatusHistory(BaseModel):
     case_id: str
-    history: List[dict]  # You can make this a structured model too
+    history: List[dict]  # You can create a proper model if needed
+
+# Add a proper model for case updates
+#also new
+class CaseUpdateModel(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    violation_types: Optional[list] = None
+    priority: Optional[str] = None
+    date_occurred: Optional[str] = None
+    date_reported: Optional[str] = None
+    perpetrators: Optional[list] = None
+    status: Optional[str] = None

@@ -1,8 +1,9 @@
 
 # app/models/user.py
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
+
 
 class Role(str, Enum):
     user = "user"
@@ -38,7 +39,9 @@ class UserResponse(BaseModel):
     role: Role
     is_approved: bool
 
+
 class UsersListResponse(BaseModel):
     users: list[UserResponse]
     total: int
+
 

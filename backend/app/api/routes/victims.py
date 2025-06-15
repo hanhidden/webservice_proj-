@@ -9,6 +9,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi.responses import JSONResponse
 from app.utils.id_generator import get_next_custom_id
 
+
 from typing import List, Dict
 
 
@@ -16,14 +17,39 @@ router = APIRouter()
 
 @router.get("/all", response_model=List[Dict])
 async def list_victims(db: AsyncIOMotorDatabase = Depends(get_database)):
-    # Add "victimId" to projection
-    cursor = db.victims.find({}, {"_id": 1, "type": 1, "victimId": 1})
+
+    cursor = db.victims.find({}, {
+    "_id": 1,
+    "victimId": 1,
+    "type": 1,
+    "demographics.name": 1,
+    "contact_info.name": 1,
+    "anonymous": 1
+})
+
+   
+
     victims = []
     async for doc in cursor:
+        # Try to get name from demographics first, then contact_info
+        name = None
+        if not doc.get("anonymous", False):
+            if doc.get("demographics") and doc["demographics"].get("name"):
+                name = doc["demographics"]["name"]
+            elif doc.get("contact_info") and doc["contact_info"].get("name"):
+                name = doc["contact_info"]["name"]
+        
         victims.append({
             "id": str(doc["_id"]),
             "type": doc.get("type", "unknown"),
+
+            "name": name,
+            #"victimId": doc.get("victimId"),  # fixed here
+
+            "anonymous": doc.get("anonymous", False)
+
             "victimId": doc.get("victimId", None)
+
         })
     return JSONResponse(content=victims)
 
