@@ -15,6 +15,8 @@ from app.api.routes.evidence_route import router as evidence_router
 
 from app.api.routes.case_status_history import router as case_status_history_router
 from app.api.routes.analytics_routes import router as analytics_router
+from app.api.routes.admin_stats import router as  admin_stats
+
 
 
 
@@ -79,3 +81,4 @@ app.include_router(case_status_history_router, prefix="/api/case_status_history"
 
 app.include_router(analytics_router, prefix="/api/analytics", tags=["Analytics"])
 
+app.include_router(admin_stats, prefix="/api/admin", tags=["Admin sats"])

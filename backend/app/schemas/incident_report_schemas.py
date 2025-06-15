@@ -139,4 +139,5 @@ class IncidentReportOutSchema(BaseModel):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     report_id: Optional[str] = None
-    org_id: Optional[str] = None  # Added for backward compatibility and clarity
+    org_id: Optional[str] = None  
+    assigned_secretaria: Optional[str] = None

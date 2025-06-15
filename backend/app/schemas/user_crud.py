@@ -29,4 +29,15 @@ async def update_user_approval(user_id: str, is_approved: bool):
     return result.modified_count
 
 
+async def get_users_by_role(role: str):
+    users_collection = db["users"]  # Use the already imported db
 
+    pipeline = [
+        {
+            "$match": {
+                "role": role
+            }
+        }
+    ]
+
+    return await users_collection.aggregate(pipeline).to_list(length=None)
