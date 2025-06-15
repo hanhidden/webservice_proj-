@@ -1,4 +1,3 @@
-#evidance router 
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status, Depends
 from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorGridFSBucket
 from datetime import datetime
@@ -22,8 +21,15 @@ async def upload_evidence(
     file: UploadFile = File(...),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ):
-    if not file.content_type.startswith(type + "/") and not (type == "pdf" and file.content_type == "application/pdf"):
-        raise HTTPException(status_code=400, detail="Type mismatch")
+    allowed_types = {
+    "image": ["image/jpeg", "image/png"],
+    "video": ["video/mp4", "video/quicktime"],
+    "pdf": ["application/pdf"]
+    }
+
+    if file.content_type not in allowed_types.get(type, []):
+        raise HTTPException(status_code=400, detail=f"Unsupported content type: {file.content_type}")
+
 
     content = await file.read()
     encoded_content = base64.b64encode(content).decode("utf-8")

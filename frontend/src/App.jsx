@@ -12,7 +12,14 @@ import VictimList from "./pages/secrateria/VictimList"; // adjust path according
 import SecretariaManageCases from "./pages/secrateria/SecretariaManageCases";
 import CaseDetailPage from "./pages/secrateria/CaseDetailPage";
 import NewCaseForm from "./pages/secrateria/NewCaseForm";
+import AdminReportsPage from "./pages/admin/AdminReportsPage";
+import OrganizationIncidentReportForm from "./pages/organization/OrganizationIncidentReportForm";
 
+import ReportDetailsPage from "./pages/admin/ReportDetailsPage";
+
+import { ErrorBoundary } from "./components/ErrorBoundary";
+
+import IncidentReportForm from "./pages/user/IncidentReportForm";
 import Adminmanagevictims from "./pages/admin/Admin_managevictims";
 import Secmanagevictims from "./pages/secrateria/Sec_managevictims";
 import UpdateVictims from "./pages/secrateria/UpdateVictims";
@@ -23,7 +30,6 @@ import AdminVictimList from "./pages/admin/Admin_VictimList";
 import Adminmanageuser from "./pages/admin/Admin_manageuser";
 
 import Stats from "./pages/user/Stats";
-
 
 function App() {
   const { user } = useAuth();
@@ -57,6 +63,7 @@ function App() {
 
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+        <Route path="/stats" element={<Stats />} />
 
       {/* Victims Management */}
       <Route path="/secretaria/victims/list" element={<VictimList />} />
@@ -82,6 +89,40 @@ function App() {
       <Route path="/secretaria/victims/list" element={<VictimList />} />
       <Route path="/secretaria/victims/new" element={<VictimForm />} />
       <Route path="/secretaria/victims/update" element={<UpdateVictims />} />
+
+         <Route path="/admin/AdminReportsPage" element={<AdminReportsPage />} />
+
+
+
+      <Route path="/admin/reports/:id" element={<ReportDetailsPage />} />
+
+      <Route 
+
+        path="/incidentReportForm" 
+
+        element={
+
+          <ErrorBoundary>
+
+
+
+            <IncidentReportForm />
+
+
+
+          </ErrorBoundary>
+
+
+
+        } 
+
+        />
+
+  <Route path="/organization/dashboard" element={<OrganizationDashboard />} />
+
+      <Route path="/organization/reports" element={<OrganizationIncidentReportForm />} />
+
+
       <Route
         path="/secretaria/victims/update/:id"
         element={<UpdateVictimform />}

@@ -73,12 +73,14 @@ export default function Header({ scrollToReport, onLogin, onLogout }) {
           <FaChartBar className="mr-1" /> Stats
         </Link>
 
-        <button
-          onClick={scrollToReport}
-          className="flex items-center hover:text-yellow-600 whitespace-nowrap"
-        >
-          <IoDocumentText className="mr-1" /> Report an Incident
-        </button>
+        
+          <Link
+            to="/incidentReportForm"
+            className="flex items-center hover:text-yellow-600 whitespace-nowrap"
+          >
+            <IoDocumentText className="mr-1" /> Report an Incident
+            
+          </Link>
       </nav>
     </header>
   );

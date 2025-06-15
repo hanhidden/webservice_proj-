@@ -46,7 +46,7 @@ async def list_victims(db: AsyncIOMotorDatabase = Depends(get_database)):
             "name": name,
             #"victimId": doc.get("victimId"),  # fixed here
 
-            "anonymous": doc.get("anonymous", False)
+            "anonymous": doc.get("anonymous", False),
 
             "victimId": doc.get("victimId", None)
 

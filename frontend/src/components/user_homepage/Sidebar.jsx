@@ -17,11 +17,11 @@ const roleTabs = {
     { to: "/admin/cases", label: " Show Cases" },
     { to: "/admin/victims", label: "Manage Victims" },
     { to: "/admin/view_reports", label: "View Reports" },
-    { to: "/admin/settings", label: "Settings" },
+    { to: "/admin/AdminReportsPage", label: "Admin Reports" },
   ],
   organization: [
     { to: "/dashboard/organization", label: "Dashboard" },
-    { to: "/organization/cases", label: "My Cases" },
+    { to: "/organization/reports", label: "Submit Report" },
   ],
   user: [{ to: "/dashboard", label: "My Dashboard" }],
 };

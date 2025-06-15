@@ -3,20 +3,43 @@
 from app.api.routes.auth import router as auth_router
 from app.api.routes.test_connection import router as test_connection_router
 from app.api.routes.users import router as users_router 
-from fastapi import FastAPI
+from fastapi import FastAPI,Request, HTTPException
+
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.victims import router as victim_router
 from app.api.routes.case_router import router as case_router
 
 from app.api.routes.incident_report import router as incident_report
 from app.api.routes.evidence_route import router as evidence_router
+
+
 from app.api.routes.case_status_history import router as case_status_history_router
-from app.api.routes.report_router import router as report_router
 from app.api.routes.analytics_routes import router as analytics_router
 
 
 
 app = FastAPI()
+
+
+
+MAX_REQUEST_SIZE = 200 * 1024 * 1024  # 200 MB
+
+
+
+@app.middleware("http")
+
+async def limit_request_size(request: Request, call_next):
+
+    content_length = request.headers.get('content-length')
+
+    if content_length and int(content_length) > MAX_REQUEST_SIZE:
+
+        raise HTTPException(status_code=413, detail="Request payload too large. Please reduce the size of evidence files.")
+
+    response = await call_next(request)
+
+    return response
+
 
 # Updated CORS configuration
 origins = [
