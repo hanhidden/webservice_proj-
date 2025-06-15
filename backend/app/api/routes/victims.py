@@ -10,6 +10,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi.responses import JSONResponse
 
 
+
 from typing import List, Dict
 
 
@@ -17,12 +18,31 @@ router = APIRouter()
 
 @router.get("/all", response_model=List[Dict])
 async def list_victims(db: AsyncIOMotorDatabase = Depends(get_database)):
-    cursor = db.victims.find({}, {"_id": 1, "type": 1})
+    cursor = db.victims.find({}, {
+    "_id": 1,
+    "victimId": 1,
+    "type": 1,
+    "demographics.name": 1,
+    "contact_info.name": 1,
+    "anonymous": 1
+})
     victims = []
     async for doc in cursor:
+        # Try to get name from demographics first, then contact_info
+        name = None
+        if not doc.get("anonymous", False):
+            if doc.get("demographics") and doc["demographics"].get("name"):
+                name = doc["demographics"]["name"]
+            elif doc.get("contact_info") and doc["contact_info"].get("name"):
+                name = doc["contact_info"]["name"]
+        
         victims.append({
             "id": str(doc["_id"]),
-            "type": doc.get("type", "unknown")
+            "type": doc.get("type", "unknown"),
+            "name": name,
+            "victimId": doc.get("victimId"),  # fixed here
+
+            "anonymous": doc.get("anonymous", False)
         })
     return JSONResponse(content=victims)
 
@@ -187,7 +207,7 @@ async def get_risk_history(victim_id: str, db: AsyncIOMotorDatabase = Depends(ge
 
 
 
-@router.get("/case/{case_id}", response_model=list[VictimOutSchema])
+@router.get("/case/{case_id}", response_model=List[VictimOutSchema])
 async def get_victims_by_case(case_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
     cursor = db.victims.find({"cases_involved": case_id})
     victims = []

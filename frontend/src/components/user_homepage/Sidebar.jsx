@@ -14,7 +14,7 @@ const roleTabs = {
   admin: [
     { to: "/dashboard/admin", label: "Admin Dashboard" },
     { to: "/admin/users", label: "Manage Users" },
-    { to: "/admin/cases", label: "Manage Cases" },
+    { to: "/admin/cases", label: " Show Cases" },
     { to: "/admin/victims", label: "Manage Victims" },
     { to: "/admin/view_reports", label: "View Reports" },
     { to: "/admin/settings", label: "Settings" },
