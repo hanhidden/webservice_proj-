@@ -21,7 +21,7 @@ const roleTabs = {
   ],
   organization: [
     { to: "/dashboard/organization", label: "Dashboard" },
-    { to: "/organization/cases", label: "My Cases" },
+    { to: "/organization/reports", label: "Submit Report" },
   ],
   user: [{ to: "/dashboard", label: "My Dashboard" }],
 };

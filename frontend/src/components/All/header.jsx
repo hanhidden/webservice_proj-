@@ -5,6 +5,8 @@ import { LawIcon } from "@primer/octicons-react";
 import { useAuth } from "../../auth";
 import { useNavigate } from "react-router-dom";
 import { FaChartBar } from "react-icons/fa";
+import { IoDocumentText } from "react-icons/io5";
+
 
 export default function AllHeader({ onLogin, onLogout }) {
   const { user, logout } = useAuth();

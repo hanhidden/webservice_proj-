@@ -40,47 +40,84 @@ async def submit_incident_report(
     report: CreateIncidentReportSchema,
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    data = report.dict()
-    data["created_at"] = datetime.utcnow()
-    data["updated_at"] = datetime.utcnow() 
-    data["status"] = "new"
-    data["report_id"] = data.get("report_id", f"IR-{uuid.uuid4().hex[:8]}")
-
-    # Victim logic
-    if report.reporter_type == "victim" or (report.reporter_type == "witness" and report.victim_details):
-        v = report.victim_details
-        existing = await db.victims.find_one({
-            "demographics.first_name": v.demographics.first_name,
-            "demographics.last_name": v.demographics.last_name,
-            "demographics.birthdate": v.demographics.birthdate
-        })
-        case_id = data["report_id"]
-        if existing:
-            await db.victims.update_one(
-                {"_id": existing["_id"]},
-                {"$push": {"cases_involved": case_id}}
-            )
-            data["victim_id"] = str(existing["_id"])
-        else:
-            new_v = v.dict()
-            new_v["cases_involved"] = [case_id]
-            new_v["type"] = "victim"
-            new_v["anonymous"] = report.anonymous
-            new_v["created_at"] = new_v["updated_at"] = datetime.utcnow()
-            res = await db.victims.insert_one(new_v)
-            data["victim_id"] = str(res.inserted_id)
-
     try:
-        result = await db.incident_reports.insert_one(data)
-        print("✅ Incident report inserted with ID:", result.inserted_id)
+        print(f"Received report data: {report.dict()}")  # Debug logging
         
-        # Fetch the inserted document and serialize it
-        inserted_doc = await db.incident_reports.find_one({"_id": result.inserted_id})
-        return serialize_document(inserted_doc)
+        data = report.dict()
+        
+        # Convert date string to datetime object for storage
+        if isinstance(data["incident_details"]["date"], str):
+            try:
+                data["incident_details"]["date"] = datetime.strptime(
+                    data["incident_details"]["date"], '%Y-%m-%d'
+                )
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+        
+        data["created_at"] = datetime.utcnow()
+        data["updated_at"] = datetime.utcnow() 
+        data["status"] = "new"
+        data["report_id"] = data.get("report_id", f"IR-{uuid.uuid4().hex[:8]}")
+
+        # Handle organization reporter logic
+        if report.reporter_type == "organization":
+            if report.reporter_id:
+                data["org_id"] = report.reporter_id  # Store as org_id for clarity
+                # Keep reporter_id as well for consistency
+                data["reporter_id"] = report.reporter_id
+            else:
+                raise HTTPException(status_code=400, detail="Organization reporter must have reporter_id")
+        
+        # Handle anonymous logic based on reporter type
+        if report.reporter_type == "witness":
+            if report.anonymous:
+                # For anonymous witnesses, store "anonymous" in contact fields
+                data["contact_info"] = {
+                    "email": "anonymous",
+                    "phone": "anonymous", 
+                    "preferred_contact": "anonymous"
+                }
+            # If witness is not anonymous, keep their contact info as provided
+        elif report.reporter_type == "victim":
+            # For victims, don't store reporter contact info
+            data["contact_info"] = {
+                "email": None,
+                "phone": None,
+                "preferred_contact": None
+            }
+        elif report.reporter_type == "organization":
+            # For organizations, keep their contact info as provided
+            pass
+        
+        # Handle victim details if provided
+        victim_id = None
+        if hasattr(report, 'victim_details') and report.victim_details:
+            # You can either store victim details in the same document
+            # or create a separate victim record and reference it
+            victim_id = str(ObjectId())  # Generate a victim ID if needed
+            data["victim_id"] = victim_id
+
+        print(f"Inserting data: {data}")  # Debug logging
+        
+        # Insert the report into the database
+        result = await db.incident_reports.insert_one(data)
+        
+        # Fetch the inserted document
+        inserted_report = await db.incident_reports.find_one({"_id": result.inserted_id})
+        
+        if not inserted_report:
+            raise HTTPException(status_code=500, detail="Failed to create report")
+        
+        print(f"Successfully created report with ID: {result.inserted_id}")  # Debug logging
+        
+        # Serialize and return the document
+        return serialize_document(inserted_report)
         
     except Exception as e:
-        print("❌ Failed to insert incident report:", str(e))
-        raise HTTPException(status_code=500, detail="Failed to create incident report")
+        print(f"Error creating incident report: {str(e)}")
+        import traceback
+        traceback.print_exc()  # Print full traceback for debugging
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.get("/reports", response_model=List[IncidentReportOutSchema])
 async def list_reports(status: Optional[str] = None, db: AsyncIOMotorDatabase = Depends(get_database)):
@@ -93,20 +130,33 @@ async def list_reports(status: Optional[str] = None, db: AsyncIOMotorDatabase = 
         docs.append(serialized_doc)
     return docs
 
+@router.get("/reports/analytics")
+async def report_analytics(db: AsyncIOMotorDatabase = Depends(get_database)):
+    pipeline = [
+        {"$unwind": "$incident_details.violation_types"},
+        {"$group": {"_id": "$incident_details.violation_types", "count": {"$sum": 1}}}
+    ]
+    result = await db.incident_reports.aggregate(pipeline).to_list(length=None)
+    
+    # Serialize the analytics result
+    serialized_result = []
+    for item in result:
+        serialized_item = {
+            "violation_type": str(item["_id"]) if item["_id"] else "Unknown",
+            "count": item["count"]
+        }
+        serialized_result.append(serialized_item)
+    
+    return {"analytics": serialized_result}
+
 @router.get("/reports/{report_id}", response_model=IncidentReportOutSchema)
 async def get_report_by_id(
     report_id: str,
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    try:
-        object_id = ObjectId(report_id)
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid report ID format")
-
-    report = await db.incident_reports.find_one({"_id": object_id})
+    report = await db.incident_reports.find_one({"report_id": report_id})
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
-
     return serialize_document(report)
 
 @router.patch("/reports/{report_id}")
@@ -139,21 +189,50 @@ async def update_report_status(
 
     raise HTTPException(status_code=500, detail="Unexpected error updating report")
 
-@router.get("/reports/analytics")
-async def report_analytics(db: AsyncIOMotorDatabase = Depends(get_database)):
+# Add endpoint to get reports by organization
+@router.get("/organization/{org_id}", response_model=List[IncidentReportOutSchema])
+async def get_reports_by_organization(
+    org_id: str,
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Get all reports submitted by a specific organization"""
+    cursor = db.incident_reports.find({"reporter_id": org_id})  # <-- changed here
+    docs = []
+    async for doc in cursor:
+        serialized_doc = serialize_document(doc)
+        docs.append(serialized_doc)
+    return docs
+
+
+@router.get("/organization/{org_id}/count-by-status")
+async def count_reports_by_status(org_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
     pipeline = [
+        {"$match": {"reporter_id": org_id}},  # changed here
+        {"$group": {"_id": "$status", "count": {"$sum": 1}}}
+    ]
+    result = await db.incident_reports.aggregate(pipeline).to_list(length=None)
+    return {item["_id"]: item["count"] for item in result}
+
+
+@router.get("/organization/{org_id}/violation-types")
+async def count_violation_types(org_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
+    pipeline = [
+        {"$match": {"reporter_id": org_id}},  # changed here
         {"$unwind": "$incident_details.violation_types"},
         {"$group": {"_id": "$incident_details.violation_types", "count": {"$sum": 1}}}
     ]
     result = await db.incident_reports.aggregate(pipeline).to_list(length=None)
-    
-    # Serialize the analytics result
-    serialized_result = []
-    for item in result:
-        serialized_item = {
-            "violation_type": str(item["_id"]) if item["_id"] else "Unknown",
-            "count": item["count"]
-        }
-        serialized_result.append(serialized_item)
-    
-    return {"analytics": serialized_result}
+    return [{"name": item["_id"], "count": item["count"]} for item in result]
+
+
+
+
+@router.get("/organization/{org_id}/locations")
+async def count_locations(org_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
+    pipeline = [
+        {"$match": {"org_id": org_id}},
+        {"$group": {"_id": "$incident_details.location", "count": {"$sum": 1}}}
+    ]
+    result = await db.incident_reports.aggregate(pipeline).to_list(length=None)
+    return [{"name": item["_id"], "count": item["count"]} for item in result]
+
