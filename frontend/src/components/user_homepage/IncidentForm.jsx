@@ -26,12 +26,7 @@ export default function IncidentForm({ reportRef }) {
             Ensure you provide as much information as possible to aid investigations.
           </p>
 
-          <button
-             
-              className="bg-[#fbbf24] hover:bg-yellow-500 text-[#0d1b2a] font-semibold  px-4 py-2 rounded-lg w-full"
-            >
-             File the report 
-            </button>
+         
         </div>
 
         {/* Right side form */}
@@ -56,12 +51,7 @@ export default function IncidentForm({ reportRef }) {
               type="date"
               className="w-full border border-gray-400 rounded-md px-3 py-2 mb-4"
             />
-            <button
-              type="submit"
-              className="bg-[#0d1b2a] hover:bg-yellow-500 text-gray-200 font-semibold px-4 py-2 rounded-lg w-full"
-            >
-              Submit Report
-            </button>
+            
           </form>
         </div>
       </div>
