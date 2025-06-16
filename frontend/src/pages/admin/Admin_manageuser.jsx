@@ -5,74 +5,8 @@ import { useAuth } from "../../auth";
 import { Ban } from "lucide-react";
 import { CiCircleCheck } from "react-icons/ci";
 
-// const UserCard = ({ user, onReject }) => {
-//   const getRoleColor = (role) => {
-//     switch (role) {
-//       case "admin":
-//         return "bg-red-50 text-red-900 border-red-200";
-//       case "organization":
-//         return "bg-navy-50 text-navy-900 border-navy-200";
-//       case "secretaria":
-//         return "bg-emerald-50 text-emerald-900 border-emerald-200";
-//       case "user":
-//         return "bg-stone-100 text-stone-800 border-stone-300";
-//       default:
-//         return "bg-stone-100 text-stone-800 border-stone-300";
-//     }
-//   };
-
-//   return (
-//     <div className="bg-cream-50 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-beige-200">
-//       <div className="flex items-start justify-between">
-//         <div className="flex-1">
-//           <h3 className="text-lg font-semibold text-navy-900">{user.name}</h3>
-//           <p className="text-stone-600 mt-1">{user.email}</p>
-//           <div className="flex items-center mt-3 space-x-3">
-//             <span
-//               className={`px-3 py-1 rounded-full text-sm font-medium border ${getRoleColor(
-//                 user.role
-//               )}`}
-//             >
-//               {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-//             </span>
-//             <span
-//               className={`px-3 py-1 rounded-full text-sm font-medium border ${
-//                 user.is_approved
-//                   ? "bg-green-50 text-green-900 border-green-200"
-//                   : "bg-amber-50 text-amber-900 border-amber-200"
-//               }`}
-//             >
-//               {user.is_approved ? "Approved" : "Pending"}
-//             </span>
-//           </div>
-//         </div>
-//         <div className="flex flex-col space-y-2 ml-4">
-//           {user.is_approved && user && (
-//             <div className="ml-4">
-//               <button
-//                 onClick={() => {
-//                   const confirmed = window.confirm(
-//                     "Are you sure you want to deactivate this account?"
-//                   );
-//                   if (confirmed) {
-//                     onReject(user.id);
-//                   }
-//                 }}
-//                 className="p-2 bg-[#fc2b2b9f] text-white rounded-full hover:bg-red-800 transition-colors shadow-sm"
-//                 title="Deactivate Account"
-//               >
-//                 <Ban className="w-4 h-4" />
-//               </button>
-//             </div>
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
 const UserCard = ({ user, onReject }) => {
-  const { user: loggedInUser } = useAuth(); // Get logged-in user
+  const { user: loggedInUser } = useAuth(); 
 
   const getRoleColor = (role) => {
     switch (role) {

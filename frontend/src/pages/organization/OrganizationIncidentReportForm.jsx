@@ -358,9 +358,13 @@ const OrganizationIncidentReportForm = () => {
 return (
   <>
     <Header />
-    <div className="min-h-screen bg-gray-100 text-gray-800 font-sans">
+
+    <div className="flex h-screen">
+       <Sidebar role="organization" />
+      <main className="flex-1 p-8 overflow-y-auto bg-gray-100">
+          <div className="min-h-screen bg-gray-100 text-gray-800 font-sans">
       <div className="max-w-4xl mx-auto py-10 px-4">
-        <Sidebar role="organization" />
+       
         <div
           onSubmit={handleSubmit}
           className="bg-white shadow-md rounded-lg p-6 space-y-8"
@@ -675,6 +679,10 @@ return (
         </div>
       </div>
     </div>
+      </main>
+
+    </div>
+  
   </>
 );
 

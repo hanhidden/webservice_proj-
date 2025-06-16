@@ -7,7 +7,8 @@ from app.core.database import get_database  # This should return AsyncIOMotorDat
 router = APIRouter()
 
 async def serialize_cursor(cursor):
-    return [doc async for doc in cursor]  # <-- use async iteration
+    return [doc async for doc in cursor]  # <-- use async iterationgit push -u origin haneenfixed 
+
 
 @router.get("/violations")
 async def get_violations_count(db: AsyncIOMotorDatabase = Depends(get_database)):
