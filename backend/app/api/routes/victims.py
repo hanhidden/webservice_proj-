@@ -8,7 +8,8 @@ from app.core.database import get_database
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi.responses import JSONResponse
 from app.utils.id_generator import get_next_custom_id
-
+from collections import Counter
+from dateutil.relativedelta import relativedelta
 
 from typing import List, Dict
 
@@ -246,3 +247,69 @@ async def get_victims_by_case(case_id: str, db: AsyncIOMotorDatabase = Depends(g
         victims.append(VictimOutSchema(**victim))
 
     return victims
+@router.get("/summary/victim-demographics-summary")
+async def get_victim_demographics_summary(db: AsyncIOMotorDatabase = Depends(get_database)):
+    pipeline = [
+        {"$match": {"type": "victim"}},
+        {"$group": {
+            "_id": None,
+            "gender_counts": {
+                "$push": "$demographics.gender"
+            },
+            "ethnicity_counts": {
+                "$push": "$demographics.ethnicity"  
+            },
+            "occupation_counts": {
+                "$push": "$demographics.occupation"
+            },
+            "ages": {
+                "$push": "$demographics.age"
+            }
+        }},
+        {"$project": {
+            "_id": 0,
+            "gender_counts": 1,
+            "ethnicity_counts": 1,
+            "occupation_counts": 1,
+            "ages": 1
+        }}
+    ]
+    
+    result = await db.victims.aggregate(pipeline).to_list(1)
+    
+    if not result:
+        return {
+            "gender": {},
+            "ethnicity": {},
+            "age_groups": {},
+            "occupation": {}
+        }
+    
+    data = result[0]
+    
+    # Count occurrences
+    from collections import Counter
+    
+    gender_counts = Counter([g for g in data.get("gender_counts", []) if g])
+    ethnicity_counts = Counter([e for e in data.get("ethnicity_counts", []) if e])
+    occupation_counts = Counter([o for o in data.get("occupation_counts", []) if o])
+    
+    # Group ages
+    age_groups = {"0-18": 0, "19-35": 0, "36-50": 0, "51+": 0}
+    for age in data.get("ages", []):
+        if age and isinstance(age, int):
+            if age <= 18:
+                age_groups["0-18"] += 1
+            elif age <= 35:
+                age_groups["19-35"] += 1
+            elif age <= 50:
+                age_groups["36-50"] += 1
+            else:
+                age_groups["51+"] += 1
+    
+    return {
+        "gender": dict(gender_counts),
+        "ethnicity": dict(ethnicity_counts),
+        "age_groups": age_groups,
+        "occupation": dict(occupation_counts)
+    }

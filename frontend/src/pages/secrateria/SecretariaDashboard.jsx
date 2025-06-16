@@ -1,10 +1,12 @@
-// export default SecretariaDashboard;
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/user_homepage/Sidebar";
 import Header from "../../components/All/header";
 import { useAuth } from "../../auth";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
+// Import loader
+import Loader from "../../components/All/Loader";
 
 const cardBase =
   "p-10 rounded-2xl shadow-md transition hover:shadow-lg cursor-pointer text-lg font-semibold flex items-center justify-center text-center";
@@ -18,15 +20,17 @@ function SecretariaDashboard() {
     approved: 0,
     open: 0,
     new: 0,
-    assigned_reports: 0, // 👈 NEW
+    assigned_reports: 0,
   });
-  console.log("Access token:", user?.access_token);
-  console.log("User object from useAuth:", user);
+
+  // Loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user?.user_id) return;
 
     const fetchData = async () => {
+      setLoading(true); // start loading
       try {
         const [caseRes, reportRes] = await Promise.all([
           axios.get(`http://localhost:8000/api/cases/count-by-status`, {
@@ -51,6 +55,8 @@ function SecretariaDashboard() {
       } catch (error) {
         console.error("Error fetching counts:", error);
         alert("Failed to fetch dashboard data.");
+      } finally {
+        setLoading(false); // done loading
       }
     };
 
@@ -60,6 +66,10 @@ function SecretariaDashboard() {
   const goToTable = (type) => {
     navigate(`/secretaria/table/${type}`);
   };
+
+  if (loading) {
+    return <Loader />; // Show loader while loading
+  }
 
   return (
     <>
@@ -89,7 +99,6 @@ function SecretariaDashboard() {
 
             {/* Grid with 2 cards per row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* 🔻 Assigned reports */}
               <div
                 className={`${cardBase}`}
                 style={{
@@ -128,7 +137,7 @@ function SecretariaDashboard() {
                   borderRadius: "1rem",
                 }}
               >
-                ✅ {counts.approved} newly approved cases
+                ✅ {counts.new} new cases
               </div>
 
               <div

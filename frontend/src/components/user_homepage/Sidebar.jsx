@@ -5,11 +5,9 @@ import "./Sidebar.css";
 const roleTabs = {
   secretaria: [
     { to: "/dashboard/secretaria", label: "Dashboard" },
-    { to: "/secretaria/reports", label: "Manage Reports" },
+    { to: "/secretaria/ReportsPage", label: "Manage Reports" },
     { to: "/secretaria/victims", label: "Manage Victims" },
     { to: "/secretaria/manage-cases", label: "Manage Cases" },
-
-    { to: "/secretaria/analysis", label: "Analysis & Visualization" },
   ],
   admin: [
     { to: "/dashboard/admin", label: "Admin Dashboard" },
