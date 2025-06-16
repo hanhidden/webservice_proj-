@@ -98,7 +98,27 @@ export default function CaseDetailPage() {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
   };
+  const handleDeleteCase = async () => {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this case? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
 
+    try {
+      await axios.delete(`http://localhost:8000/api/cases/${caseData._id}`);
+      alert("Case deleted successfully.");
+      // Optionally redirect to case list or dashboard:
+      window.location.href = "/dashboard"; // change path as needed
+    } catch (error) {
+      alert(
+        "Failed to delete case: " +
+          (error.response?.data?.detail || error.message)
+      );
+    }
+  };
   const handleSave = async () => {
     try {
       await axios.patch(
@@ -114,30 +134,36 @@ export default function CaseDetailPage() {
       );
     }
   };
-
   const handleStatusChange = async (e) => {
     const newStatus = e.target.value;
     if (!statusComment.trim())
       return alert("Please provide a comment when changing status");
 
     try {
-      await axios.post(
+      const response = await axios.post(
         `http://localhost:8000/api/case_status_history/${caseData.case_id}`,
         {
           new_status: newStatus,
           description: statusComment,
         }
       );
+
+      // Update case data
       setCaseData((c) => ({ ...c, status: newStatus }));
-      setHistory((h) => [
-        {
-          new_status: newStatus,
-          description: statusComment,
-          date_changed: new Date().toISOString(),
-        },
-        ...h,
-      ]);
+
+      // Add to history state (prepend to show newest first)
+      const newHistoryEntry = {
+        new_status: newStatus,
+        description: statusComment,
+        date_changed: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      setHistory((h) => [newHistoryEntry, ...h]);
       setStatusComment("");
+
+      alert("Status updated successfully");
     } catch (error) {
       alert(
         "Failed to update case status: " +
@@ -184,6 +210,12 @@ export default function CaseDetailPage() {
           <h1 className="text-2xl font-bold mb-4">
             Case: {caseData.case_id || caseData._id}
           </h1>
+          <button
+            onClick={handleDeleteCase}
+            className="bg-red-600 text-white px-6 py-2 rounded-xl hover:bg-red-700 border-2 border-transparent hover:border-red-300 transition mt-2"
+          >
+            Delete Case
+          </button>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-xl shadow border border-[#F9CC5B]">
             <div>
@@ -326,7 +358,7 @@ export default function CaseDetailPage() {
                         <td className="px-4 py-2 border">
                           {new Date(h.updated_at).toLocaleString()}
                         </td>
-                        <td className="px-4 py-2 border">{h.state}</td>
+                        <td className="px-4 py-2 border">{h.new_status}</td>
                         <td className="px-4 py-2 border">{h.description}</td>
                         <td className="px-4 py-2 border">
                           <button
@@ -377,24 +409,90 @@ export default function CaseDetailPage() {
           {/* Evidence */}
           <div className="bg-white p-6 rounded-xl shadow border border-[#F9CC5B]">
             <h2 className="text-xl font-bold mb-4">Evidence</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {(caseData.evidence || []).map((e, i) =>
-                e.type === "photo" ? (
-                  <div key={i} className="border rounded p-2 shadow">
-                    <img
-                      src={e.url}
-                      alt={e.description}
-                      className="max-w-full h-auto rounded"
-                    />
-                    <p className="text-sm mt-2">{e.description}</p>
-                  </div>
-                ) : (
-                  <div key={i} className="border rounded p-2 shadow">
-                    <p>
-                      <strong>{e.type}:</strong> {e.description}
+
+            <div className="space-y-4">
+              {(caseData.evidence || []).map((e, i) => (
+                <div key={i} className="border rounded-lg p-4 shadow-sm">
+                  <p className="mb-2">
+                    <strong>Type:</strong> {e.type}
+                  </p>
+                  <p className="mb-3">
+                    <strong>Description:</strong> {e.description}
+                  </p>
+                  {e.date_captured && (
+                    <p className="mb-3 text-sm text-gray-600">
+                      <strong>Date Captured:</strong>{" "}
+                      {new Date(e.date_captured).toLocaleDateString()}
                     </p>
-                  </div>
-                )
+                  )}
+
+                  {/* Video Evidence */}
+                  {e.type === "video" && e.url && (
+                    <video
+                      src={`http://localhost:8000${e.url}`}
+                      controls
+                      width="100%"
+                      className="rounded-md shadow"
+                    />
+                  )}
+
+                  {/* PDF Evidence */}
+                  {e.type === "pdf" && e.url && (
+                    <iframe
+                      src={`http://localhost:8000${e.url}`}
+                      width="100%"
+                      height="500px"
+                      className="rounded-md shadow"
+                      title={`PDF Evidence ${i + 1}`}
+                    />
+                  )}
+
+                  {/* Image Evidence */}
+                  {(e.type === "image" || e.type === "photo") && e.url && (
+                    <img
+                      src={`http://localhost:8000${e.url}`}
+                      alt={e.description || "Evidence"}
+                      className="max-w-full h-auto rounded-md shadow"
+                    />
+                  )}
+
+                  {/* Document Evidence */}
+                  {e.type === "document" && e.url && (
+                    <div className="bg-blue-50 p-3 rounded border">
+                      <a
+                        href={`http://localhost:8000${e.url}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        📄 View Document
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Other Evidence Types with URL */}
+                  {!["video", "pdf", "image", "photo", "document"].includes(
+                    e.type
+                  ) &&
+                    e.url && (
+                      <div className="bg-gray-50 p-3 rounded border">
+                        <a
+                          href={`http://localhost:8000${e.url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          🔗 View Evidence File ({e.type})
+                        </a>
+                      </div>
+                    )}
+                </div>
+              ))}
+
+              {(!caseData.evidence || caseData.evidence.length === 0) && (
+                <p className="text-gray-500 italic">
+                  No evidence uploaded for this case.
+                </p>
               )}
             </div>
           </div>

@@ -1,24 +1,49 @@
-from fastapi import APIRouter, HTTPException, Depends
-from datetime import datetime
 from typing import List
 from bson import ObjectId
 from app.core.database import get_database
+from fastapi import APIRouter, HTTPException, Depends
+from datetime import datetime
 import logging
 
 router = APIRouter()
+
 @router.get("/{case_id}")
 async def get_status_history(case_id: str, db=Depends(get_database)):
     doc = await db.case_status_history.find_one({"case_id": case_id})
     if not doc or "history" not in doc:
         raise HTTPException(status_code=404, detail="No history found")
 
-    # Format datetime and IDs inside history array
+    # Normalize and format the history entries
+    normalized_history = []
     for item in doc["history"]:
-        for field in ["date_changed"]:
+        # Create a normalized entry
+        normalized_item = {
+            "new_status": item.get("new_status") or item.get("state", "unknown"),
+            "description": item.get("description", ""),
+            "date_changed": None,
+            "created_at": item.get("created_at"),
+            "updated_at": item.get("updated_at")
+        }
+        
+        # Handle date_changed field (could be updated_at for older entries)
+        date_field = item.get("date_changed") or item.get("updated_at")
+        if date_field:
+            if isinstance(date_field, datetime):
+                normalized_item["date_changed"] = date_field.isoformat()
+            elif isinstance(date_field, str):
+                normalized_item["date_changed"] = date_field
+        
+        # Format other datetime fields
+        for field in ["created_at", "updated_at"]:
             if isinstance(item.get(field), datetime):
-                item[field] = item[field].isoformat()
+                normalized_item[field] = item[field].isoformat()
+        
+        normalized_history.append(normalized_item)
 
-    return doc["history"]
+    # Sort by date_changed descending (newest first)
+    normalized_history.sort(key=lambda x: x.get("date_changed", ""), reverse=True)
+    
+    return normalized_history
 
 
 @router.post("/{case_id}")
@@ -27,50 +52,52 @@ async def add_status_history(case_id: str, payload: dict, db=Depends(get_databas
     description = payload.get("description", "")
     now = datetime.utcnow()
 
-    entry = {
-        "case_id": case_id,
-        "new_status": new_status,
+    # Create the new history entry with consistent field names
+    new_entry = {
+        "new_status": new_status,  # Always use new_status for consistency
         "description": description,
         "date_changed": now,
         "created_at": now,
         "updated_at": now
     }
 
-    await db.case_status_history.insert_one(entry)
-    # ✅ Update case using `case_id`, not `_id`
-    result = await db.cases.update_one({"case_id": case_id}, {"$set": {"status": new_status}})
-    if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="Case not found")
+    # Try to find existing document and append to history
+    doc = await db.case_status_history.find_one({"case_id": case_id})
+    
+    if doc:
+        # Document exists, append to history array
+        result = await db.case_status_history.update_one(
+            {"case_id": case_id},
+            {
+                "$push": {"history": new_entry},
+                "$set": {"updated_at": now}
+            }
+        )
+    else:
+        # Document doesn't exist, create new one with history array
+        new_doc = {
+            "case_id": case_id,
+            "history": [new_entry],
+            "created_at": now,
+            "updated_at": now
+        }
+        result = await db.case_status_history.insert_one(new_doc)
 
-    return {"message": "Status updated"}
+    # Update the case status
+    case_result = await db.cases.update_one(
+        {"case_id": case_id}, 
+        {"$set": {"status": new_status, "updated_at": now}}
+    )
+    
+    if case_result.modified_count == 0:
+        # Check if case exists at all
+        case_exists = await db.cases.find_one({"case_id": case_id})
+        if not case_exists:
+            raise HTTPException(status_code=404, detail="Case not found")
+
+    return {"message": "Status updated successfully", "new_status": new_status}
 
 
-# @router.delete("/{case_id}/{history_id}")
-# async def delete_status_history(case_id: str, history_id: str, db=Depends(get_database)):
-#     doc = await db.case_status_history.find_one({"case_id": case_id})
-#     if not doc:
-#         logging.warning(f"No document found for case_id={case_id}")
-#         raise HTTPException(status_code=404, detail="No history found")
-#     if "history" not in doc:
-#         logging.warning(f"Document for case_id={case_id} has no history")
-#         raise HTTPException(status_code=404, detail="No history found")
-
-#     original_length = len(doc["history"])
-#     updated_history = [h for h in doc["history"] if h.get("history_id") != history_id]
-
-#     if len(updated_history) == original_length:
-#         logging.warning(f"History ID {history_id} not found in case_id={case_id}")
-#         raise HTTPException(status_code=404, detail="History entry not found")
-
-#     await db.case_status_history.update_one(
-#         {"case_id": case_id},
-#         {"$set": {"history": updated_history}}
-#     )
-
-#     new_status = updated_history[-1]["new_status"] if updated_history else "new"
-#     await db.cases.update_one({"case_id": case_id}, {"$set": {"status": new_status}})
-
-#     return {"message": "History entry deleted", "new_status": new_status}
 @router.delete("/{case_id}/index/{history_index}")
 async def delete_status_by_index(case_id: str, history_index: int, db=Depends(get_database)):
     doc = await db.case_status_history.find_one({"case_id": case_id})
@@ -88,15 +115,19 @@ async def delete_status_by_index(case_id: str, history_index: int, db=Depends(ge
     # Update the document in MongoDB
     await db.case_status_history.update_one(
         {"case_id": case_id},
-        {"$set": {"history": history}}
+        {"$set": {"history": history, "updated_at": datetime.utcnow()}}
     )
 
     # Determine the new status from last history item, or default
     new_status = history[-1]["new_status"] if history else "new"
 
-    await db.cases.update_one({"case_id": case_id}, {"$set": {"status": new_status}})
+    await db.cases.update_one(
+        {"case_id": case_id}, 
+        {"$set": {"status": new_status}}
+    )
 
     return {
         "message": f"Deleted history at index {history_index}",
-        "new_status": new_status
+        "new_status": new_status,
+        "deleted_entry": deleted_entry
     }

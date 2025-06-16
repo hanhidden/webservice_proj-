@@ -56,13 +56,14 @@ async def get_all_case_ids(db: AsyncIOMotorDatabase = Depends(get_database)):
     """
     Returns all case IDs and their MongoDB _id from the database.
     """
-    cases_cursor = db.cases.find({}, {"case_id": 1, "_id": 1})  # Project both 'case_id' and '_id'
+    # cases_cursor = db.cases.find({}, {"case_id": 1, "_id": 1})  # Project both 'case_id' and '_id'
+    cases_cursor = db.cases.find({"deleted": {"$ne": True}}, {"case_id": 1, "_id": 1})
+
     case_ids = [
         {"_id": str(doc["_id"]), "case_id": doc["case_id"]}
         async for doc in cases_cursor
     ]
     return {"case_ids": case_ids}
-
 
 @router.post("/")
 async def create_case(case_data: dict, db: AsyncIOMotorDatabase = Depends(get_database)):
@@ -71,12 +72,12 @@ async def create_case(case_data: dict, db: AsyncIOMotorDatabase = Depends(get_da
     """
     try:
         print("Received case data:", case_data)  # DEBUG
-        
+
         # Extract and validate required fields
         case_id = case_data.get("case_id")
         if not case_id:
             raise HTTPException(status_code=400, detail="case_id is required")
-        
+
         # Prepare the document for MongoDB
         case_doc = {
             "case_id": case_id,
@@ -89,7 +90,7 @@ async def create_case(case_data: dict, db: AsyncIOMotorDatabase = Depends(get_da
             "updated_at": datetime.utcnow(),
             "deleted": False
         }
-        
+
         # Handle dates
         date_occurred = case_data.get("date_occurred")
         if date_occurred:
@@ -100,7 +101,7 @@ async def create_case(case_data: dict, db: AsyncIOMotorDatabase = Depends(get_da
                     case_doc["date_occurred"] = date_occurred
             except:
                 case_doc["date_occurred"] = datetime.utcnow()
-        
+
         date_reported = case_data.get("date_reported")
         if date_reported:
             try:
@@ -112,8 +113,8 @@ async def create_case(case_data: dict, db: AsyncIOMotorDatabase = Depends(get_da
                 case_doc["date_reported"] = datetime.utcnow()
         else:
             case_doc["date_reported"] = datetime.utcnow()
-            
-        #handle user
+
+        # Handle user
         assigned_secretaria = case_data.get("assigned_secretaria")
         if not assigned_secretaria:
             raise HTTPException(status_code=400, detail="assigned_secretaria is required")
@@ -128,17 +129,15 @@ async def create_case(case_data: dict, db: AsyncIOMotorDatabase = Depends(get_da
             case_doc["perpetrators"] = [perpetrator]
         else:
             case_doc["perpetrators"] = []
-        
+
         # Handle selected reports and inherit their evidence
         selected_reports = case_data.get("selectedReports", [])
         case_doc["list_of_reports_IDs"] = selected_reports
-        
-        # FETCH EVIDENCE FROM SELECTED REPORTS
+
         case_doc["evidence"] = []
         if selected_reports:
             print(f"Fetching evidence from {len(selected_reports)} selected reports")
-            
-            # Convert report IDs to ObjectIds for querying
+
             report_object_ids = []
             for report_id in selected_reports:
                 try:
@@ -146,63 +145,82 @@ async def create_case(case_data: dict, db: AsyncIOMotorDatabase = Depends(get_da
                 except:
                     print(f"Warning: Invalid report ID format: {report_id}")
                     continue
-            
+
             if report_object_ids:
-                # Fetch reports and extract their evidence
                 reports_cursor = db.incident_reports.find(
                     {"_id": {"$in": report_object_ids}},
-                    {"evidence": 1, "report_id": 1}  # Only fetch evidence and report_id fields
+                    {"evidence": 1, "report_id": 1}
                 )
-                
+
                 async for report in reports_cursor:
                     report_evidence = report.get("evidence", [])
                     if report_evidence:
                         print(f"Found {len(report_evidence)} evidence items in report {report.get('report_id')}")
-                        # Add source report info to each evidence item
                         for evidence_item in report_evidence:
                             evidence_with_source = evidence_item.copy()
                             evidence_with_source["source_report_id"] = str(report["_id"])
                             evidence_with_source["source_report_ref"] = report.get("report_id")
                             case_doc["evidence"].append(evidence_with_source)
-                
+
                 print(f"Total evidence items inherited: {len(case_doc['evidence'])}")
-        
+
         # Handle victims and witnesses
         case_doc["victims"] = []
         case_doc["witnesses"] = []
-        
-        # Handle additional victims/witnesses
+
         additional_victims = case_data.get("additionalVictims", [])
         additional_witnesses = case_data.get("additionalWitnesses", [])
-        
+
         for victim_id in additional_victims:
             try:
                 case_doc["victims"].append(ObjectId(victim_id))
             except:
                 pass
-                
+
         for witness_id in additional_witnesses:
             try:
                 case_doc["witnesses"].append(ObjectId(witness_id))
             except:
                 pass
-        
+
         print("Final case document:", case_doc)  # DEBUG
-        
-        # Insert into database
+
+        # Insert the case into the database
         result = await db.cases.insert_one(case_doc)
-        
+
+        # Create initial case status history
+        now = datetime.utcnow()
+        case_status_history_doc = {
+            "case_id": case_id,
+            "history": [{
+                "updated_at": now,
+                "state": "new",
+                "description": "Case created and marked as new."
+            }],
+            "created_at": now,
+            "updated_at": now
+        }
+
+        await db.case_status_history.insert_one(case_status_history_doc)
+
         return JSONResponse(
-            content={"id": str(result.inserted_id), "message": "Case created successfully"},
+            content={
+                "id": str(result.inserted_id),
+                "message": "Case created successfully, with status history"
+            },
             status_code=201
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error creating case: {e}")
         print(f"Case data received: {case_data}")
         raise HTTPException(status_code=500, detail=f"Failed to create case: {str(e)}")
+
+
+
+
 @router.get("/")
 async def list_cases(
     status: Optional[str] = None,
@@ -213,7 +231,7 @@ async def list_cases(
     date_reported: Optional[str] = Query(None),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    query = {}
+    query = {"deleted": {"$ne": True}}
 
     if status:
         query["status"] = status
@@ -248,24 +266,27 @@ async def list_cases(
     return JSONResponse(content=serialized_cases)
 
 
-
 @router.get("/count-by-status")
 async def count_cases_by_status(
-    secretaria_id: str = Query(...),
+    secretaria_id: Optional[str] = Query(None),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
     print(f"Debug: Querying cases for secretaria ID = {secretaria_id}")
+    
+    query = {}  
+    query["deleted"] = {"$ne": True}
+    if secretaria_id:
+        try:
+            secretaria_object_id = ObjectId(secretaria_id)
+            query["assigned_secretaria"] = secretaria_object_id
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid secretaria ObjectId")
 
-    try:
-        secretaria_object_id = ObjectId(secretaria_id)
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid secretaria ObjectId")
-
-    open_cases = await db["cases"].count_documents({"status": "open", "assigned_secretaria": secretaria_object_id})
-    new_cases = await db["cases"].count_documents({"status": "new", "assigned_secretaria": secretaria_object_id})
-    closed_cases = await db["cases"].count_documents({"status": "closed", "assigned_secretaria": secretaria_object_id})
-    waiting_for_approval = await db["cases"].count_documents({"status": "waiting_for_approval", "assigned_secretaria": secretaria_object_id})
-    approved_cases = await db["cases"].count_documents({"status": "approved", "assigned_secretaria": secretaria_object_id})
+    open_cases = await db["cases"].count_documents({**query, "status": "open"})
+    new_cases = await db["cases"].count_documents({**query, "status": "new"})
+    closed_cases = await db["cases"].count_documents({**query, "status": "closed"})
+    waiting_for_approval = await db["cases"].count_documents({**query, "status": "waiting_for_approval"})
+    approved_cases = await db["cases"].count_documents({**query, "status": "approved"})
 
     return {
         "new": new_cases or 0,
@@ -276,12 +297,16 @@ async def count_cases_by_status(
     }
 
 
+
 # GET single case
 @router.get("/{case_id}")
 async def get_case(case_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
     """Get a single case by ID with proper ObjectId serialization"""
     try:
-        case = await db.cases.find_one({"_id": ObjectId(case_id)})
+        case = await db.cases.find_one({
+            "_id": ObjectId(case_id),
+            "deleted": {"$ne": True}
+        })
         
         if not case:
             raise HTTPException(status_code=404, detail="Case not found")
@@ -401,9 +426,16 @@ async def update_case_status(
         raise HTTPException(status_code=500, detail=f"Failed to update case status: {str(e)}")
     
 @router.delete("/{case_id}")
-async def archive_case(case_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
-    result = await db.cases.delete_one({"case_id": case_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Case not found")
-    return {"message": "Case archived"}
+async def soft_delete_case(case_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
+    try:
+        result = await db.cases.update_one(
+            {"_id": ObjectId(case_id)},
+            {"$set": {"deleted": True, "updated_at": datetime.utcnow()}}
+        )
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Case not found")
+        return {"message": "Case soft-deleted successfully"}
+    except Exception as e:
+        print(f"Error soft-deleting case: {e}")
+        raise HTTPException(status_code=500, detail="Failed to soft-delete case")
 

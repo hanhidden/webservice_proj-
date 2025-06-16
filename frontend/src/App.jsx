@@ -63,7 +63,7 @@ function App() {
 
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
-        <Route path="/stats" element={<Stats />} />
+      <Route path="/stats" element={<Stats />} />
 
       {/* Victims Management */}
       <Route path="/secretaria/victims/list" element={<VictimList />} />
@@ -90,38 +90,32 @@ function App() {
       <Route path="/secretaria/victims/new" element={<VictimForm />} />
       <Route path="/secretaria/victims/update" element={<UpdateVictims />} />
 
-         <Route path="/admin/AdminReportsPage" element={<AdminReportsPage />} />
-
-
+      <Route path="/admin/AdminReportsPage" element={<AdminReportsPage />} />
 
       <Route path="/admin/reports/:id" element={<ReportDetailsPage />} />
 
-      <Route 
+      <Route path="/secretaria/ReportsPage" element={<AdminReportsPage />} />
 
-        path="/incidentReportForm" 
+      <Route path="/secretaria/reports/:id" element={<ReportDetailsPage />} />
 
+      <Route
+        path="/incidentReportForm"
         element={
-
           <ErrorBoundary>
-
-
-
             <IncidentReportForm />
-
-
-
           </ErrorBoundary>
+        }
+      />
 
+      <Route
+        path="/organization/dashboard"
+        element={<OrganizationDashboard />}
+      />
 
-
-        } 
-
-        />
-
-  <Route path="/organization/dashboard" element={<OrganizationDashboard />} />
-
-      <Route path="/organization/reports" element={<OrganizationIncidentReportForm />} />
-
+      <Route
+        path="/organization/reports"
+        element={<OrganizationIncidentReportForm />}
+      />
 
       <Route
         path="/secretaria/victims/update/:id"

@@ -1,4 +1,3 @@
-
 import { FaBalanceScale } from "react-icons/fa";
 
 const Loader = () => (
