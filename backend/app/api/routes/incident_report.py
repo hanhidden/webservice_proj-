@@ -222,6 +222,7 @@ from datetime import datetime
 from typing import List, Optional
 import uuid
 
+
 from app.models import incident_report_models, victim_models
 from app.schemas.incident_report_schemas import (
     CreateIncidentReportSchema,
@@ -487,6 +488,8 @@ async def update_report_status(
         return serialize_document(updated)
 
     raise HTTPException(status_code=500, detail="Unexpected error updating report")
+
+
 # Add endpoint to get reports by organization
 @router.get("/organization/{org_id}", response_model=List[IncidentReportOutSchema])
 async def get_reports_by_organization(
@@ -502,14 +505,44 @@ async def get_reports_by_organization(
     return docs
 
 
+# @router.get("/organization/{org_id}/count-by-status")
+# async def count_reports_by_status(org_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
+#     pipeline = [
+#         {"$match": {"reporter_id": org_id}},  # changed here
+#         {"$group": {"_id": "$status", "count": {"$sum": 1}}}
+#     ]
+#     result = await db.incident_reports.aggregate(pipeline).to_list(length=None)
+#     return {item["_id"]: item["count"] for item in result}
+
+
+
+
+
 @router.get("/organization/{org_id}/count-by-status")
 async def count_reports_by_status(org_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
     pipeline = [
-        {"$match": {"reporter_id": org_id}},  # changed here
-        {"$group": {"_id": "$status", "count": {"$sum": 1}}}
+    {"$match": {"reporter_id": org_id}},
+    {
+        "$group": {
+            "_id": "$status",
+            "count": {"$sum": 1},
+            "report_ids": {"$push": "$report_id"}  # <-- Push your custom report_id here
+        }
+    }
     ]
     result = await db.incident_reports.aggregate(pipeline).to_list(length=None)
-    return {item["_id"]: item["count"] for item in result}
+
+    return {
+        item["_id"]: {
+            "count": item["count"],
+            "report_ids": item["report_ids"]  # no need to convert ObjectId, this is string
+        }
+        for item in result
+    }
+
+
+
+
 
 
 @router.get("/organization/{org_id}/violation-types")
