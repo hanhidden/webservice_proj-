@@ -49,7 +49,8 @@ origins = [
     "http://127.0.0.1:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5173",  # Add localhost with 127.0.0.1
-    "http://localhost:5174",  # Add common Vite alternative port
+    "http://localhost:5174",
+    "https://webservice-proj.vercel.app" , # Add common Vite alternative port
     # Add other origins if needed
 ]
 
