@@ -16,27 +16,27 @@
 ## 🚀 How to Run
 
 1. Clone the repo
-   ```bash
-   git clone https://github.com/your-repo/human-rights-monitor.git
-   cd human-rights-monitor
-   ```
+```bash
+git clone https://github.com/your-repo/human-rights-monitor.git
+cd human-rights-monitor
+```
    
-3. Run MongoDB server
-4.Run the Backend
-   ```bash
-   cd backend
-   .\venv\Scripts\activate
-   uvicorn app.main:app --reload
-   ```
+2. Run MongoDB server
+3.Run the Backend
+```bash
+cd backend
+.\venv\Scripts\activate
+uvicorn app.main:app --reload
+```
    
-5.Run the Frontend
+4.Run the Frontend
  ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-6.Open the App
+5.Open the App
 - Frontend: http://localhost:5173/
 - Backend Docs (Swagger UI): http://127.0.0.1:8000/docs
 
@@ -44,15 +44,8 @@ npm run dev
 
 ## 🎥 Project Demo
 
-<p align="center">
-  <a href="https://drive.google.com/file/d/16wWnw67QIzCvsSAte4oDAzdxRYw-nilu/view?usp=sharing" target="_blank">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/7/75/YouTube_social_white_squircle_%282017%29.svg" 
-         alt="Watch Demo" width="120" />
-  </a>
-  <br>
-  📺 <strong><a href="https://drive.google.com/file/d/16wWnw67QIzCvsSAte4oDAzdxRYw-nilu/view?usp=sharing" target="_blank">
-  Watch the Demo Video on Google Drive</a></strong>
-</p>
+📺 **[Watch the Demo Video on Google Drive](https://drive.google.com/file/d/16wWnw67QIzCvsSAte4oDAzdxRYw-nilu/view?usp=sharing)**  
+🎬 Click the link above to preview the full demo of the Human Rights Monitor MIS.
 
 ---
 
